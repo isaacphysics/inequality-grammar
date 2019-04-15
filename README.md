@@ -1,6 +1,6 @@
 # Inequality grammar
 
-A grammar to parse linear-text maths and produce an AST that [Inequality](https://github.com/Morpheu5/Inequality) can digest.
+A grammar to parse linear-text maths and produce an AST that [Inequality](https://github.com/isaacphysics/inequality) can digest.
 
 ## Usage
 
