@@ -4,7 +4,7 @@ const moo = require("moo")
 const lexer = moo.compile({
     Int: /[0-9]+/,
     IdMod: /[a-zA-Z]+_(?:prime)/,
-    Id: { match: /[a-zA-Z]+(?:_[a-zA-Z0-9]+)?/, keywords: {
+    Id: { match: /[a-zA-Z]+(?:_[a-zA-Z0-9]+)?/, type: moo.keywords({
     TrigFn: ['cos', 'sin', 'tan',
              'cosec', 'sec', 'cot',
              'cosh', 'sinh', 'tanh', 'cosech', 'sech', 'coth',
@@ -19,7 +19,7 @@ const lexer = moo.compile({
     Log: ['log'],
     Radix: ['sqrt'],
     Derivative: ['diff', 'Derivative'],
-         },
+        }),
     },
     Rel: ['=', '==', '<', '<=', '>', '>='],
     PlusMinus: ['+', '-', '±', '-', '-'], // The minus signs are not all the same
