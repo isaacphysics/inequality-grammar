@@ -13,6 +13,10 @@ module.exports = function(input) {
   parser.feed(input);
   var compilation = compile(parser.results[0], {file: this.resourcePath});
   lint(compilation, {});
-  compilation.body = [ babel.transform(compilation.body.join("\n"), { presets: ['@babel/env'] }).code ];
+  var babelPresets = [
+    "@babel/preset-env"
+  ];
+  var transformed = babel.transformSync(compilation.body.join("\n"), { presets: babelPresets })
+  compilation.body = [ transformed.code ];
   return generate(compilation, 'grammar');
 }
