@@ -5,7 +5,7 @@ const lexer = moo.compile({
     Int: /[0-9]+/,
     IdMod: /[a-zA-Z]+_(?:prime)/,
     Id: { match: /[a-zA-Z]+(?:_[a-zA-Z0-9]+)?/, keywords: {
-	TrigFn: ['cos', 'sin', 'tan',
+    TrigFn: ['cos', 'sin', 'tan',
              'cosec', 'sec', 'cot',
              'cosh', 'sinh', 'tanh', 'cosech', 'sech', 'coth',
              'arccos', 'arcsin', 'arctan',
@@ -122,10 +122,10 @@ const processBrackets = (d) => {
 const processFunction = (d) => {
     let arg = _cloneDeep(d[3])
     // FIXME Split this into two functions and separate parsing rules.
-    if (d[0].text === 'abs') {	
-        return { type: 'AbsoluteValue', children: { argument: arg } }	
-    } else {	
-        return { type: 'Fn', properties: { name: d[0].text, allowSubscript: d[0].text !== 'ln', innerSuperscript: false }, children: { argument: arg } }	
+    if (d[0].text === 'abs') {
+        return { type: 'AbsoluteValue', children: { argument: arg } }
+    } else {
+        return { type: 'Fn', properties: { name: d[0].text, allowSubscript: d[0].text !== 'ln', innerSuperscript: false }, children: { argument: arg } }
     }
 }
 
@@ -224,7 +224,7 @@ const processFraction = (d) => {
     if (denominatorRight) {
         fraction.children.right = denominatorRight
     }
-    
+
     if (numeratorChain.length > 0) {
         numeratorChain[numeratorChain.length-1].children.right = fraction
         return numeratorChain.reduceRight((a, e) => { e.children.right = a; return e })
