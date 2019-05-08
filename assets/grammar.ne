@@ -183,7 +183,7 @@ const processExponent = (d) => {
         }
     }
 
-    if (['Fn', 'Log', 'TrigFn'].includes(f.type)) {
+    if (['Fn', 'Log', 'TrigFn'].indexOf(f.type) > -1) {
         switch (f.properties.name) {
             case 'ln':
                 return { type: 'Brackets', properties: { type: 'round' }, children: { argument: f, superscript: e } }
@@ -277,12 +277,12 @@ const processIdentifier = (d) => {
         }
     } else {
         // We don't have a differential, business as usual
-        if (greekLetterKeys.includes(parts[0])) {
+        if (greekLetterKeys.indexOf(parts[0]) > -1) {
             parts[0] = greekLetterMap[parts[0]]
         }
         let topChain = _processChainOfLetters(parts[0])
         if (parts.length > 1) {
-            if (greekLetterKeys.includes(parts[1])) {
+            if (greekLetterKeys.indexOf(parts[1]) > -1) {
                 parts[1] = greekLetterMap[parts[1]]
             }
             let chain = _processChainOfLetters(parts[1])
@@ -296,7 +296,7 @@ const processIdentifier = (d) => {
 const processIdentifierModified = (d) => {
     const greekLetterKeys = Object.keys(greekLetterMap)
     let parts = d[0].text.split('_')
-    if (greekLetterKeys.includes(parts[0])) {
+    if (greekLetterKeys.indexOf(parts[0]) > -1) {
         parts[0] = greekLetterMap[parts[0]]
     }
     let topChain = _processChainOfLetters(parts[0])
