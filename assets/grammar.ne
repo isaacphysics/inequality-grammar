@@ -131,19 +131,26 @@ const processFunction = (d) => {
 
 const processSpecialTrigFunction = (d_name, d_arg, d_exp = null) => {
     // First, deal with the shortened a- form of arc- functions.
-    let r = new RegExp('^a([^r].+)$')
+    let r = new RegExp('^(?:a|arc)([^r].+)$')
     let name = d_name.text
+    let arc = false
     if (r.test(name)) {
-        name = `arc${r.exec(name)[1]}`
+        name = r.exec(name)[1]
+        arc = 1
     }
     // Then do everything else as normal.
     let arg = _cloneDeep(d_arg)
     let exp = _cloneDeep(d_exp)
+    let sym;
     if (null === exp) {
-        return { type: 'Fn', properties: { name: name, allowSubscript: false, innerSuperscript: true }, children: { argument: arg } }
+        sym = { type: 'Fn', properties: { name: name, allowSubscript: false, innerSuperscript: true }, children: { argument: arg } }
     } else {
-        return { type: 'Fn', properties: { name: name, allowSubscript: false, innerSuperscript: true }, children: { superscript: exp, argument: arg } }
+        sym = { type: 'Fn', properties: { name: name, allowSubscript: false, innerSuperscript: true }, children: { superscript: exp, argument: arg } }
     }
+    if (arc) {
+        sym.children.superscript = { type: 'Num', properties: { significand: '-1' }, children: {} }
+    }
+    return sym
 }
 
 const processLog = (arg, base = null) => {
