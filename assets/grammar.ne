@@ -36,6 +36,7 @@ const lexer = moo.compile({
 
 import _cloneDeep from 'lodash/cloneDeep'
 import _isEmpty from 'lodash/isEmpty'
+import _isEqual from 'lodash/isEqual'
 import _map from 'lodash/map'
 import _mapValues from 'lodash/mapValues'
 import _omit from 'lodash/omit'
