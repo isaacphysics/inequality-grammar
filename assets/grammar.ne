@@ -1,10 +1,29 @@
 @{%
 const greekLetterMap = { "alpha": "α", "beta": "β", "gamma": "γ", "delta": "δ", "epsilon": "ε", "varepsilon": "ε", "zeta": "ζ", "eta": "η", "theta": "θ", "iota": "ι", "kappa": "κ", "lambda": "λ", "mu": "μ", "nu": "ν", "xi": "ξ", "omicron": "ο", "pi": "π", "rho": "ρ", "sigma": "σ", "tau": "τ", "upsilon": "υ", "phi": "ϕ", "chi": "χ", "psi": "ψ", "omega": "ω", "Gamma": "Γ", "Delta": "Δ", "Theta": "Θ", "Lambda": "Λ", "Xi": "Ξ", "Pi": "Π", "Sigma": "Σ", "Upsilon": "Υ", "Phi": "Φ", "Psi": "Ψ", "Omega": "Ω" }
+// See https://github.com/no-context/moo/blob/v0.5.1/moo.js#L337-L371
+function keywordTransformSafe(map) {
+    let reverseMap = Object.create(null);
+    let types = Object.getOwnPropertyNames(map);
+    for (let i = 0; i < types.length; i++) {
+        let tokenType = types[i];
+        let item = map[tokenType];
+        let keywordList = Array.isArray(item) ? item : [item];
+        keywordList.forEach(function(keyword) {
+            if (typeof keyword !== 'string') {
+                throw new Error("keyword must be string (in keyword '" + tokenType + "')");
+            }
+            reverseMap[keyword] = tokenType;
+        })
+    }
+    return function(k) {
+        return reverseMap[k];
+    }
+}
 const moo = require("moo")
 const lexer = moo.compile({
     Int: /[0-9]+/,
     IdMod: /[a-zA-Z]+_(?:prime)/,
-    Id: { match: /[a-zA-Z]+(?:_[a-zA-Z0-9]+)?/, type: moo.keywords({
+    Id: { match: /[a-zA-Z]+(?:_[a-zA-Z0-9]+)?/, type: keywordTransformSafe({
             TrigFn: ['cos', 'sin', 'tan',
                      'cosec', 'sec', 'cot',
                      'cosh', 'sinh', 'tanh', 'cosech', 'sech', 'coth',
