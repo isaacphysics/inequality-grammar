@@ -29,9 +29,9 @@
     "webpack-cli": "^3.3.12"
   },
   "dependencies": {
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.20",
     "moo": "^0.5.1",
     "nearley": "^2.19.5",
-    "npm-check-updates": "^7.1.0"
+    "npm-check-updates": "^7.1.1"
   }
 }
