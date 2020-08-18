@@ -1,4 +1,7 @@
 import parseMathsExpression from './parseMaths';
 import parseBooleanExpression from './parseBool';
 
-export { parseMathsExpression, parseBooleanExpression };
+// This is now DEPRECATED and you should use parseMathsExpression instead.
+const parseExpression = parseMathsExpression;
+
+export { parseExpression, parseMathsExpression, parseBooleanExpression };
