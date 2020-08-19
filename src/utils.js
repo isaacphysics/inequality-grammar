@@ -1,4 +1,10 @@
+import _cloneDeep from 'lodash/cloneDeep'
+import _isEmpty from 'lodash/isEmpty'
+import _isEqual from 'lodash/isEqual'
+import _map from 'lodash/map'
 import _mapValues from 'lodash/mapValues'
+import _omit from 'lodash/omit'
+import _reduceRight from 'lodash/reduceRight'
 
 export const _rightChainToArray = (node) => {
     let n = node

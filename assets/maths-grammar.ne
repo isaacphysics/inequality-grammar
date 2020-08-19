@@ -51,13 +51,10 @@ const lexer = moo.compile({
     c: /./,
 })
 
-// import _ from 'lodash'
-
 import _cloneDeep from 'lodash/cloneDeep'
 import _isEmpty from 'lodash/isEmpty'
 import _isEqual from 'lodash/isEqual'
 import _map from 'lodash/map'
-import _mapValues from 'lodash/mapValues'
 import _omit from 'lodash/omit'
 import _reduceRight from 'lodash/reduceRight'
 
@@ -159,7 +156,7 @@ const processExponent = (d) => {
     } else {
         const exponentRight = _cloneDeep(e.children.right)
         if (exponentRight) {
-            f.children.right = exponentRight
+            r.children.right = exponentRight
             e.children = _omit(e.children, 'right')
         }
     }
