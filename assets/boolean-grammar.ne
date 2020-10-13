@@ -102,6 +102,7 @@ P -> "(" _ AS _ ")"         {% processBrackets %}
 
 # NOT
 N -> "NOT" _ P              {% processNot %}
+   | "not" _ P              {% processNot %}
    |  "!"  _ P              {% processNot %}
    |  "~"  _ P              {% processNot %}
    |  "¬"  _ P              {% processNot %}
