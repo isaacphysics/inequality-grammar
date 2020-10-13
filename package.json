@@ -1,6 +1,6 @@
 {
   "name": "inequality-grammar",
-  "version": "0.10.1",
+  "version": "0.10.2",
   "description": "",
   "main": "dist/inequality-grammar.js",
   "files": [
