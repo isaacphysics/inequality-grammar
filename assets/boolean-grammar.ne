@@ -24,6 +24,17 @@ const processMain = (d) => {
     return _simplify(main)
 }
 
+const processRelation = (d) => {
+    let lhs = _cloneDeep(d[1])
+    let rhs = _cloneDeep(d[5])
+    let relText = d[3].text === '==' ? '=' : d[3].text
+    let relation = { type: 'Relation', properties: { relation: relText }, children: { right: rhs } }
+    let r = _findRightmost(lhs)
+    r.children['right'] = relation
+    lhs = _simplify(lhs)
+    return { ...lhs, position: { x: _window.innerWidth/4, y: _window.innerHeight/3 }, expression: { latex: "", python: "" } }
+}
+
 const processBrackets = (d) => {
     const arg = d[2] //_cloneDeep(d[2])
     return { type: 'Brackets', properties: { type: 'round' }, children: { argument: arg } }
@@ -71,6 +82,7 @@ const processNot = (d) => {
 %}
 
 main -> _ AS _              {% processMain %}
+      | _ AS _ "=" _ AS _   {% processRelation %} 
 
 # OR
 AS -> AS _ "OR" _ MD        {% processBinaryOperation %}
