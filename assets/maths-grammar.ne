@@ -68,6 +68,12 @@ try {
     _window = { innerWidth: 800, innerHeight: 600 }
 }
 
+/* Main point of entry. This function sets up the outer shell of the
+   Inequality AST with placeholder data that will then be properly filled in
+   by Inequality's headless parser.
+
+   The `_simplify()`` function avoids unnecessarily nested parentheses.
+ */
 const processMain = (d) => {
     let main = _cloneDeep(d[1])
     main.position = { x: _window.innerWidth/4, y: _window.innerHeight/3 }
@@ -75,6 +81,14 @@ const processMain = (d) => {
     return _simplify(main)
 }
 
+/* This is an alternative main point of entry for when we want to parse
+   expressions that contain two sides joined by a relation symbol, such as
+   equalities and inequalities.
+
+   This one also sets up the outer shell of the Inequality AST because it
+   operates at the same level as `processMain()`, so it has to perform a
+   similar job.
+ */
 const processRelation = (d) => {
     let lhs = _cloneDeep(d[1])
     let rhs = _cloneDeep(d[5])
@@ -86,11 +100,30 @@ const processRelation = (d) => {
     return { ...lhs, position: { x: _window.innerWidth/4, y: _window.innerHeight/3 }, expression: { latex: "", python: "" } }
 }
 
+/* Processes round brackets. For simplicity, we only support round brackets
+   here. The only job of this function is to enclose its parsed argument in
+   a round Brackets object. Any nested brackets are taken care of elsewhere.
+ */
 const processBrackets = (d) => {
     let arg = _cloneDeep(d[2])
     return { type: 'Brackets', properties: { type: 'round' }, children: { argument: arg } }
 }
 
+/* Processes functions. There are multiple types of functions – see the lexer
+   and grammar for a comprehensive list.
+
+   This function deals with two special cases. First, the `abs()` function is
+   its own special object in the Inequality AST. Second, the natural logarithm
+   function (`ln`) should not allow a subscript, which could be interpreted as a
+   base, thus generating confusion.
+
+   Regular functions do not show inner superscripts like the trigonometric
+   functions, e.g., `sqrt(x)^2` vs `sin^2(x)`. We parse both `sin^2(x)` and
+   `sin(x)^2` in the same way, whereas `ln^2(x)` triggers a syntax error.
+
+   It would be nice to split the two code paths (abs vs any other) but this
+   isn't such a big deal for the moment.
+ */
 const processFunction = (d) => {
     let arg = _cloneDeep(d[3])
     // FIXME Split this into two functions and separate parsing rules.
@@ -101,6 +134,15 @@ const processFunction = (d) => {
     }
 }
 
+/* Processes trigonometric functions. These are fun because they include
+   inverses in the a- and arc- forms – i.e., atan, arcsin... – which
+   Inequality only shows using the ^-1 notation, and so the name has to be
+   cleaned out and a -1 Num superscript is added.
+
+   Trigonometric functions show a superscript between the name and the argument.
+   This is fine because Inequality deals with this automatically when the
+   `innerSuperscript` property is set to true.
+ */
 const processSpecialTrigFunction = (d_name, d_arg, d_exp = null) => {
     // First, deal with the shortened a- form of arc- functions.
     let r = new RegExp('^(?:a|arc)([^r].+)$')
@@ -119,12 +161,26 @@ const processSpecialTrigFunction = (d_name, d_arg, d_exp = null) => {
     } else {
         sym = { type: 'Fn', properties: { name: name, allowSubscript: false, innerSuperscript: true }, children: { superscript: exp, argument: arg } }
     }
+    // If this was an inverse trig function, add a -1 exponent.
+    // FIXME: When parsing an inverse trig function that already has an
+    //        exponent, the exponent it nuked.
+    //      - Possible solution: take any exponent, multiply it by -1, and add
+    //        the appropriate result to the superscript docking point.
+    //      - Workaround: surround the function with brackets: (arctan(x))^2.
     if (arc) {
         sym.children.superscript = { type: 'Num', properties: { significand: '-1' }, children: {} }
     }
     return sym
 }
 
+/* Processes non-natural logarithms. These logarithms default to base 10 but
+   a different base can be specified as a second argument to the function.
+   E.g., `log(x, 2)` creates a base 2 logarithm.
+   
+   There is also limited support for symbols are bases, so `log(x, alpha_0)` is
+   the logarithm of x in base \alpha_0. Expressions more complex than this are
+   not allowed.
+ */
 const processLog = (arg, base = null) => {
     let log = { type: 'Fn', properties: { name: 'log', allowSubscript: true, innerSuperscript: false }, children: { argument: arg } }
     if (null !== base) {
@@ -138,11 +194,22 @@ const processLog = (arg, base = null) => {
     return log
 }
 
+/* Processes radices. This is basically the `sqrt(x)` syntax which is
+   technically only a square root. The only way to express other exponents is
+   to use the drag-and-drop editor, or to use fractional exponents which do not
+   get turned into a radix anyway – `x^(1/3)` is just `x` to the power of 1/3.
+ */
 const processRadix = (d) => {
     let arg = _cloneDeep(d[3])
     return { type: 'Radix', children: { argument: arg } }
 }
 
+/* Processes exponents. This function surrounds logarithms in brackets before
+   adding the exponent so that it is clear that we are not raising the argument
+   instead. This is not necessary for any of the other supported functions, but
+   it may become necessary in the future in case any other functions will come
+   in and bring potential confusion with them.
+ */
 const processExponent = (d) => {
     let f = _cloneDeep(d[0])
     let e = _cloneDeep(d[4])
@@ -178,6 +245,9 @@ const processExponent = (d) => {
     }
 }
 
+/* Processes multiplication.
+   Yep, that's it.
+ */
 const processMultiplication = (d) => {
     let lhs = _cloneDeep(d[0])
     let rhs = _cloneDeep(d[d.length-1])
@@ -186,9 +256,17 @@ const processMultiplication = (d) => {
     return lhs
 }
 
+/* Processes fractions. Fractions are a bit of a mess because they allow any
+   expression as numerator and denominator, they can have a negative sign that
+   is either typed before the a fraction enclosed in brackets – `-(x/3)` – or as
+   part of the numerator – `-x/3` – and the syntax can be extremely free,
+   leading to ambiguities that this function tries to resolve as much as
+   possible while keeping it as simple as feasible.
+ */
 const processFraction = (d) => {
     let denominatorRight = null
     if (d[4].type === 'BinaryOperation') {
+        // This case tries to resolve the 1/2-3 ambiguity and makes it into (1/2)-3. If you need 1/(2-3) just say so.
         denominatorRight = _cloneDeep(d[4].children.right.children.right)
         d[4].children.right.children = _omit(d[4].children.right.children, 'right')
     } else {
@@ -196,6 +274,7 @@ const processFraction = (d) => {
         d[4].children = _omit(d[4].children, 'right')
     }
     let numerator = _cloneDeep(d[0])
+    // TODO Try to remember what this does...
     let numeratorChain = _rightChainToArray(numerator).map(e => { e.children = _omit(e.children, 'right'); return e })
     let numeratorRight = numeratorChain.pop()
 
@@ -212,6 +291,9 @@ const processFraction = (d) => {
     }
 }
 
+/* Process additions and subtractions.
+   Easy.
+ */
 const processPlusMinus = (d) => {
     let lhs = _cloneDeep(d[0])
     let rhs = _cloneDeep(d[4])
@@ -220,10 +302,23 @@ const processPlusMinus = (d) => {
     return lhs
 }
 
+/* Process unary versions of binary operations – i.e., when you start your
+   expression with a + or - sign.
+
+   It may seem counterintuitive to use a BinaryOperation here but remember that
+   the Inequality AST is a left-to-right tree so it doesn't matter that there
+   may be nothing to the left of a BinaryOperation.
+ */
 const processUnaryPlusMinus = (d) => {
     return { type: 'BinaryOperation', properties: { operation: d[0].text }, children: { right: d[2] } }
 }
 
+/* Takes any sequence of letters that isn't a supported symbol and multiplies
+   them together, doing the right thing if it encounters numbers. Examples:
+   - abcde = a*b*c*d*e
+   - 4xy = 4*x*y
+   - ab543cd = a*b*543*c*d
+ */
 const _processChainOfLetters = (s) => {
     let symbols = _map(s.split(''), (letter) => {
         if (/[0-9]/.test(letter)) {
@@ -239,6 +334,13 @@ const _processChainOfLetters = (s) => {
     return chain
 }
 
+/* An "identifier" is essentially a letter, unless it isn't like in the case
+   of differentials.
+
+   This function is mainly responsible for parsing things like `x`, `x_0`,
+   `x_y`, `alpha_1`, and so on, but `dx` is a differential, so if you want `d*x`
+   you have to say so explicitly. `d(x)` also generates `d*(x)` so be careful.
+ */
 const processIdentifier = (d) => {
     const greekLetterKeys = Object.keys(greekLetterMap)
     let parts = d[0].text.split('_')
@@ -272,6 +374,9 @@ const processIdentifier = (d) => {
     }
 }
 
+/* Processes "modified" Symbols. For example, `alpha_prime` generates a Symbol
+   that specifies a `'` modifier.
+ */
 const processIdentifierModified = (d) => {
     const greekLetterKeys = Object.keys(greekLetterMap)
     let parts = d[0].text.split('_')
@@ -284,10 +389,31 @@ const processIdentifierModified = (d) => {
     return topChain
 }
 
+/* Processes numbers. We have all the integers: we have positive integers,
+   we have negative integers, we even have zero, but none of that rational
+   nonsense!
+   
+   Because we have fractions for that. We are not savages...
+ */
 const processNumber = (d) => {
     return { type: 'Num', properties: { significand: d[0].text }, children: {} }
 }
 
+/* Processes derivatives.
+   This may look like a complicated function but the complication really only
+   originates from the order calculations.
+
+   The basic syntax is somewhat similar to SymPy's `diff` function. We take
+   the experssion to be derived as the first parameter, and the differentials
+   as any number of subsequent parameters.
+
+   Differentials can be specified as a sequence of variable and order, or as
+   any repetition of the variable that corresponds to the desired order.
+   For example, `Derivative(f(x), y, 2, t, t, t)` corresponds to deriving `f(x)`
+   in `y` twice and `t` three times.
+
+   If that makes any sense.
+ */
 const processDerivative = (d) => {
     let numerator = {
         type: 'Differential',
