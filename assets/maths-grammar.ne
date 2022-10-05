@@ -483,6 +483,7 @@ const processDerivative = (d) => {
 main -> _ AS _                                                         {% processMain %}
       | _ AS _ %Rel _ AS _                                             {% processRelation %}
 
+# Functions of various kinds. Some are even disguised as operators!
 P ->                   %Lparen _ AS _                 %Rparen          {% processBrackets %}
    | %TrigFn           %Lparen _ AS _                 %Rparen          {% d => processSpecialTrigFunction(d[0], d[3], null) %}
    | %TrigFn %Pow NUM  %Lparen _ AS _                 %Rparen          {% d => processSpecialTrigFunction(d[0], d[5], d[2]) %}
@@ -497,9 +498,11 @@ P ->                   %Lparen _ AS _                 %Rparen          {% proces
    | NUM                                                               {% id %}
    | %PlusMinus _ P                                                    {% processUnaryPlusMinus %}
 
+# Arguments to functions
 ARGS -> AS                                                             {% (d) => [d[0]] %}
       | ARGS _ %Comma _ AS                                             {% (d) => d[0].concat(d[4]) %}
 
+# Exponents
 E -> P _ %Pow _ E                                                      {% processExponent %}
    | P                                                                 {% id %}
 
@@ -509,12 +512,17 @@ MD -> MD _ %Mul _ E                                                    {% proces
     | MD _ E                                                           {% processMultiplication %}
     | E                                                                {% id %}
 
+# Addition and subtraction
 AS -> AS _ %PlusMinus _ MD                                             {% processPlusMinus %}
     | MD                                                               {% id %}
 
+# Variables (letters and such)
 VAR -> %Id                                                             {% processIdentifier %}
      | %IdMod                                                          {% processIdentifierModified %}
 
+# Numbers
 NUM -> %Int                                                            {% processNumber %}
 
+# Whitespace. The important thing here is that the postprocessor
+# is a null-returning function. This is a memory efficiency trick.
 _ -> [\s]:*

@@ -17,6 +17,12 @@ try {
     _window = { innerWidth: 800, innerHeight: 600 }
 }
 
+/* Main point of entry. This function sets up the outer shell of the
+   Inequality AST with placeholder data that will then be properly filled in
+   by Inequality's headless parser.
+
+   The `_simplify()`` function avoids unnecessarily nested parentheses.
+ */
 const processMain = (d) => {
     const main = _cloneDeep(d[1])
     main.position = { x: _window.innerWidth/4, y: _window.innerHeight/3 }
@@ -24,6 +30,14 @@ const processMain = (d) => {
     return _simplify(main)
 }
 
+/* This is an alternative main point of entry for when we want to parse
+   expressions that contain two sides joined by a relation symbol, such as
+   equalities and inequalities.
+
+   This one also sets up the outer shell of the Inequality AST because it
+   operates at the same level as `processMain()`, so it has to perform a
+   similar job.
+ */
 const processRelation = (d) => {
     let lhs = _cloneDeep(d[1])
     let rhs = _cloneDeep(d[5])
@@ -35,11 +49,16 @@ const processRelation = (d) => {
     return { ...lhs, position: { x: _window.innerWidth/4, y: _window.innerHeight/3 }, expression: { latex: "", python: "" } }
 }
 
+/* Processes round brackets. For simplicity, we only support round brackets
+   here. The only job of this function is to enclose its parsed argument in
+   a round Brackets object. Any nested brackets are taken care of elsewhere.
+ */
 const processBrackets = (d) => {
     const arg = d[2] //_cloneDeep(d[2])
     return { type: 'Brackets', properties: { type: 'round' }, children: { argument: arg } }
 }
 
+/* Process Boolean logical binary operations. */
 const processBinaryOperation = (d) => {
     const lhs = _cloneDeep(d[0])
     const rhs = _cloneDeep(d[d.length-1])
@@ -74,6 +93,7 @@ const processBinaryOperation = (d) => {
     return lhs
 }
 
+/* Process Not operator. */
 const processNot = (d) => {
     return { type: 'LogicNot', children: { argument: d[2] } }
 }
@@ -130,7 +150,6 @@ L -> "true"           {% (d) => ({ type: 'LogicLiteral', properties: { value: tr
    | "F"              {% (d) => ({ type: 'LogicLiteral', properties: { value: false }, children: {} }) %}
    | "0"              {% (d) => ({ type: 'LogicLiteral', properties: { value: false }, children: {} }) %}
    | [A-EG-SU-Z]	  {% (d) => ({ type: 'Symbol', properties: { letter: d[0] }, children: {} }) %}
-
 
 # Whitespace. The important thing here is that the postprocessor
 # is a null-returning function. This is a memory efficiency trick.
