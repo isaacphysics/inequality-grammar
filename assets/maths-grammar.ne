@@ -162,13 +162,18 @@ const processSpecialTrigFunction = (d_name, d_arg, d_exp = null) => {
         sym = { type: 'Fn', properties: { name: name, allowSubscript: false, innerSuperscript: true }, children: { superscript: exp, argument: arg } }
     }
     // If this was an inverse trig function, add a -1 exponent.
-    // FIXME: When parsing an inverse trig function that already has an
-    //        exponent, the exponent it nuked.
-    //      - Possible solution: take any exponent, multiply it by -1, and add
-    //        the appropriate result to the superscript docking point.
-    //      - Workaround: surround the function with brackets: (arctan(x))^2.
+    // If an exponent is already specified (e.g., atan(x)^2 or atan^2(x)) then
+    // surround the inverse trig function in brackets and move the exponent
+    // outside.
     if (arc) {
-        sym.children.superscript = { type: 'Num', properties: { significand: '-1' }, children: {} }
+        if (sym.children.superscript) {
+            const oldSuperscript = _cloneDeep(sym.children.superscript);
+            const oldSym = _cloneDeep(sym);
+            oldSym.children.superscript = { type: 'Num', properties: { significand: '-1' }, children: {} }
+            sym = { type: 'Brackets', properties: { type: 'round' }, children: { argument: oldSym, superscript: oldSuperscript } }
+        } else {
+            sym.children.superscript = { type: 'Num', properties: { significand: '-1' }, children: {} }
+        }
     }
     return sym
 }
