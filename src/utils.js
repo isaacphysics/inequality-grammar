@@ -6,6 +6,12 @@ import _mapValues from 'lodash/mapValues'
 import _omit from 'lodash/omit'
 import _reduceRight from 'lodash/reduceRight'
 
+/**
+ * Turns a chain of right-bound WidgetSpecs into an array.
+ * 
+ * @param {WidgetSpec} node 
+ * @returns {WidgetSpec[]}
+ */
 export const _rightChainToArray = (node) => {
     let n = node
     let a = [n]
@@ -16,6 +22,11 @@ export const _rightChainToArray = (node) => {
     return a
 }
 
+/**
+ * Finds the last WidgetSpec going down the "right"-chain of children in an Inequality AST
+ * @param {WidgetSpec} node 
+ * @returns {WidgetSpec}
+ */
 export const _findRightmost = (node) => {
     let n = node
     while (n.children.right) {
@@ -24,10 +35,22 @@ export const _findRightmost = (node) => {
     return n
 }
 
+/**
+ * Checks if a node is just an empty set of brackets.
+ * 
+ * @param {WidgetSpec} node 
+ * @returns True if the node is an empty set of brackets.
+ */
 export const _safeToRemove = (node) => {
     return node && node.type === 'Brackets' && _isEmpty(_omit(node.children, 'argument'))
 }
 
+/**
+ * Attempts to simplify expressions where extra unnecessary brackets have been generated.
+ * 
+ * @param {WidgetSpec} node - A subtree to simplify.
+ * @returns The simplified node.
+ */
 export const _simplify = (node) => {
     node.children = _mapValues(node.children, (v, k, c) => _simplify(v))
 
