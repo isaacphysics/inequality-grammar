@@ -10,6 +10,7 @@ that [Inequality](https://github.com/isaacphysics/inequality) can digest.
 ```javascript
 import { parseMathsExpression } from 'inequality-grammar';
 
+// Use parseBooleanExpression for Boolean algebra.
 try {
     const output = parseMathsExpression(this.mathInput);
     enjoy(output);
