@@ -35,13 +35,14 @@ const lexer = moo.compile({
                      'acosec', 'asec', 'acot',
                      'acosh', 'asinh', 'atanh', 'acosech', 'asech', 'acoth',
                     ],
-            Fn: ['ln', 'abs'],
+            Fn: ['ln', 'abs', 'factorial'],
             Log: ['log'],
             Radix: ['sqrt'],
             Derivative: ['diff', 'Derivative'],
         }),
     },
     Rel: ['=', '==', '<', '<=', '>', '>='],
+    Factorial: ['!'],
     PlusMinus: ['+', '-', '±', '-', '-'], // The minus signs are not all the same
     Pow: ['**', '^'],
     Mul: ['*', '×'],
@@ -112,10 +113,11 @@ const processBrackets = (d) => {
 /* Processes functions. There are multiple types of functions – see the lexer
    and grammar for a comprehensive list.
 
-   This function deals with two special cases. First, the `abs()` function is
+   This function deals with three special cases. First, the `abs()` function is
    its own special object in the Inequality AST. Second, the natural logarithm
    function (`ln`) should not allow a subscript, which could be interpreted as a
-   base, thus generating confusion.
+   base, thus generating confusion. `factorial` should be parsed as a postfix unary
+   operation on its argument.
 
    Regular functions do not show inner superscripts like the trigonometric
    functions, e.g., `sqrt(x)^2` vs `sin^2(x)`. We parse both `sin^2(x)` and
@@ -129,6 +131,8 @@ const processFunction = (d) => {
     // FIXME Split this into two functions and separate parsing rules.
     if (d[0].text === 'abs') {
         return { type: 'AbsoluteValue', children: { argument: arg } }
+    } else if (d[0].text === 'factorial') {
+        return { type: 'UnaryOperation', properties: { type: "postfix", operation: "!" }, children: { argument: arg } }
     } else {
         return { type: 'Fn', properties: { name: d[0].text, allowSubscript: d[0].text !== 'ln', innerSuperscript: false }, children: { argument: arg } }
     }
@@ -318,6 +322,10 @@ const processUnaryPlusMinus = (d) => {
     return { type: 'BinaryOperation', properties: { operation: d[0].text }, children: { right: d[2] } }
 }
 
+const processFactorial = (d) => {
+    return { type: 'UnaryOperation', properties: { type: 'postfix', operation: d[2].text }, children: { argument: d[0] } }
+}
+
 /* Takes any sequence of letters that isn't a supported symbol and multiplies
    them together, doing the right thing if it encounters numbers. Examples:
    - abcde = a*b*c*d*e
@@ -502,6 +510,7 @@ P ->                   %Lparen _ AS _                 %Rparen          {% proces
    | VAR                                                               {% id %}
    | NUM                                                               {% id %}
    | %PlusMinus _ P                                                    {% processUnaryPlusMinus %}
+   | P _ %Factorial                                                    {% processFactorial %}
 
 # Arguments to functions
 ARGS -> AS                                                             {% (d) => [d[0]] %}
