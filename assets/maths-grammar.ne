@@ -128,7 +128,7 @@ const processBrackets = (d) => {
  */
 const processFunction = (d) => {
     let arg = _cloneDeep(d[3])
-    // FIXME Split this into two functions and separate parsing rules.
+    // FIXME Split this into three functions and separate parsing rules.
     if (d[0].text === 'abs') {
         return { type: 'AbsoluteValue', children: { argument: arg } }
     } else if (d[0].text === 'factorial') {
