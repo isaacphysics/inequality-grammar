@@ -23,8 +23,8 @@ function keywordTransformSafe(map) {
 const moo = require("moo")
 const lexer = moo.compile({
     Int: /[0-9]+/,
-    IdMod: /[a-zA-Z]+_(?:prime)/,
-    Id: { match: /[a-zA-Z]+(?:_[a-zA-Z0-9]+)?/, type: keywordTransformSafe({
+    IdMod: /[a-zA-ZΑ-Ωα-ω]+_(?:prime)/,
+    Id: { match: /[a-zA-ZΑ-Ωα-ω]+(?:_[a-zA-Z0-9]+)?/, type: keywordTransformSafe({
             TrigFn: ['cos', 'sin', 'tan',
                      'cosec', 'sec', 'cot',
                      'cosh', 'sinh', 'tanh', 'cosech', 'sech', 'coth',
