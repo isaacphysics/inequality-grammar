@@ -1,7 +1,5 @@
 import { Parser, Grammar } from 'nearley';
 import grammar from '../../assets/chemistry-grammar.ne';
-import exports from 'webpack';
-import { functions } from 'lodash';
 
 // const compiledGrammar = Grammar.fromCompiled(grammar);
 const lexer = grammar.Lexer;
@@ -435,6 +433,16 @@ describe("Lexer correctly identifies electrons", () => {
             )
         }
     );
+    it("Fails to lex 'e'",
+        () => {
+            // Act
+            lexer.reset('e');
+            const token = lexer.next();
+
+            // Assert
+            expect(token.type).toBe('Error');
+        }
+    );
 });
 
 describe("Lexer correctly identifies LaTeX No-Op", () => {
@@ -458,26 +466,26 @@ describe("Lexer correctly handles complex expressions", () => {
                 'Element',
                 'Element',
                 'Element',
-                'Coeff',
+                'Num',
                 'LParen',
                 'LParen',
                 'Element',
-                'Coeff',
+                'Num',
                 'Element',
-                'Coeff',
+                'Num',
                 'RParen',
-                'Coeff',
+                'Num',
                 'Element',
-                'Coeff',
+                'Num',
                 'RParen',
-                'Coeff',
+                'Num',
                 'LParen',
                 'Element',
                 'Element',
                 'RParen',
-                'Coeff'
+                'Num'
             ];
-            lexer.reset('Mg');
+            lexer.reset('MgNaAl5((Si2O4)2O2)3(OH)6');
             const tokens = Array.from(lexer);
 
             // Assert
