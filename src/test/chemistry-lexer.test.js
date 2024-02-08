@@ -1,6 +1,7 @@
 import { Parser, Grammar } from 'nearley';
 import grammar from '../../assets/chemistry-grammar.ne';
 import exports from 'webpack';
+import { functions } from 'lodash';
 
 // const compiledGrammar = Grammar.fromCompiled(grammar);
 const lexer = grammar.Lexer;
@@ -109,14 +110,17 @@ describe("Lexer correctly identifies 'Charge' symbol", () => {
             expect(token.type).toBe('Positive');
         }
     );
-    it("Lexes '\^{-}' as 'Negative'",
+    it("Lexes '\^{-}', '-' as 'Negative'",
         () => {
             // Act
             lexer.reset("\^{-}");
             const token = lexer.next();
+            lexer.reset("-");
+            const token2 = lexer.next();
 
             // Assert
             expect(token.type).toBe('Negative');
+            expect(token2.type).toBe('Negative');
         }
     );
     it("Lexes '\^{NUM[+-]}' as 'Charge(\^{NUM[+-]})",
@@ -442,6 +446,46 @@ describe("Lexer correctly identifies LaTeX No-Op", () => {
 
             // Assert
             expect(token.type).toBe('Nop');
+        }
+    );
+});
+
+describe("Lexer correctly handles complex expressions", () => {
+    it("Lexes 'MgNaAl5((Si2O4)2O2)3(OH)6' correctly",
+        () => {
+            // Act
+            const expected = [
+                'Element',
+                'Element',
+                'Element',
+                'Coeff',
+                'LParen',
+                'LParen',
+                'Element',
+                'Coeff',
+                'Element',
+                'Coeff',
+                'RParen',
+                'Coeff',
+                'Element',
+                'Coeff',
+                'RParen',
+                'Coeff',
+                'LParen',
+                'Element',
+                'Element',
+                'RParen',
+                'Coeff'
+            ];
+            lexer.reset('Mg');
+            const tokens = Array.from(lexer);
+
+            // Assert
+            tokens.forEach(
+                function(item, index, _arr) {
+                    expect(item.type).toBe(expected[index]);
+                }
+            )
         }
     );
 });
