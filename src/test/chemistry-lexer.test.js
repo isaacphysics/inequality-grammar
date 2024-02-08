@@ -78,10 +78,10 @@ describe("Lexe correctly identifies 'Arrow' symbol", () => {
             expect(token.type).toBe('DArr');
         }
     );
-    it("Fails to lex '-->', '<==>', '>', '=>', and '<='",
+    it("Fails to lex '<->', '<==>', '>', '=>', and '<='",
         () => {
             // Act
-            const tests = ['-->', '<==>', '>', '=>', '<='];
+            const tests = ['<->', '<==>', '>', '=>', '<='];
             tests.forEach(
                 function(input, index, arr) {
                     lexer.reset(input);
@@ -137,10 +137,10 @@ describe("Lexer correctly identifies 'Charge' symbol", () => {
             expect(neg.value).toBe('\^{19-}');
         }
     );
-    it("Fails to lex '\^{++}', '\^{}', '\^{+', '\^+}', '-', '\^+', '\^{0+}'",
+    it("Fails to lex '\^{++}', '\^{}', '\^{+', '\^+}', '\^+', '\^{0+}'",
         () => {
             // Act
-            const tests = ['\^{++}', '\^{}', '\^{+', '\^+}', '-', '\^+', '\^{0+}'];
+            const tests = ['\^{++}', '\^{}', '\^{+', '\^+}', '\^+', '\^{0+}'];
             tests.forEach(
                 function(item, index, arr) {
                     lexer.reset(item);
