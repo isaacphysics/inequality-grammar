@@ -15,9 +15,9 @@ const lexer = moo.compile({
     })},
 
     // Charges
-    Charge: { match: /\^{(?:[1-9][0-9]*)?(?:\+|\-)}/, type: moo.keywords({
+    Charge: { match: /(?:-|\^{(?:[1-9][0-9]*)?(?:\+|\-)})/, type: moo.keywords({
         Positive: "^{+}",
-        Negative: "^{-}"
+        Negative: ["^{-}", "-"]
     })},
 
     // Non-zero naturals
