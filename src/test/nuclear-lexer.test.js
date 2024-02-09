@@ -66,20 +66,10 @@ describe("Lexe correctly identifies 'Arrow' symbol", () => {
             expect(token.type).toBe('SArr');
         }
     );
-    it("Lexes '<=>' as 'DArr'",
+    it("Fails to lex '<->', '<=>', '>', '=>', and '<='",
         () => {
             // Act
-            lexer.reset("<=>");
-            const token = lexer.next();
-
-            // Assert
-            expect(token.type).toBe('DArr');
-        }
-    );
-    it("Fails to lex '<->', '<==>', '>', '=>', and '<='",
-        () => {
-            // Act
-            const tests = ['<->', '<==>', '>', '=>', '<='];
+            const tests = ['<->', '<=>', '>', '=>', '<='];
             tests.forEach(
                 function(input, index, arr) {
                     lexer.reset(input);
@@ -279,11 +269,11 @@ describe("Lexer correctly identifies addition", () => {
 });
 
 describe("Lexer correctly identifies brackets", () => {
-    it("Lexes '(', ')', '[', ']', '{', '}' as 'Parentheses'",
+    it("Lexes '(', ')', '[', ']' as 'Parentheses'",
         () => {
             // Act
-            const tests = ['(', ')', '[', ']', '{', '}'];
-            const types = ['LParen', 'RParen', 'LSquare', 'RSquare', 'LCurl', 'RCurl'];
+            const tests = ['(', ')', '[', ']'];
+            const types = ['LParen', 'RParen', 'LSquare', 'RSquare'];
             const tokens = [];
             tests.forEach(
                 function(item, index, _arr) {
@@ -394,7 +384,7 @@ describe("Lexer correctly identifies nuclear particles", () => {
             // Act
             lexer.reset("\\alphaparticle\\betaparticle\\gammaray\\neutrino\\antineutrino\\electron\\positron\\neutron\\proton");
             const tokens = Array.from(lexer);
-            const types = ["Alpha", "Beta", "Gamma", "Neutrino", "Anti_neutrino", "Electron", "Positron", "Neutron", "Proton"]
+            const types = ["Alpha", "Beta", "Gamma", "Neutrino", "AntiNeutrino", "Electron", "Positron", "Neutron", "Proton"]
 
             // Assert
             tokens.forEach(
