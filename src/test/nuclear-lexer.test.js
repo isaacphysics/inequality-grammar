@@ -1,4 +1,3 @@
-import { Parser, Grammar } from 'nearley';
 import grammar from '../../assets/nuclear-grammar.ne';
 
 // const compiledGrammar = Grammar.fromCompiled(grammar);

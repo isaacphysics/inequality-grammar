@@ -1,4 +1,3 @@
-import { Parser, Grammar } from 'nearley';
 import grammar from '../../assets/chemistry-grammar.ne';
 
 // const compiledGrammar = Grammar.fromCompiled(grammar);
@@ -149,6 +148,39 @@ describe("Lexer correctly identifies 'Charge' symbol", () => {
             // Assert
             tests.forEach(
                 function(item, _token, _arr) {
+                    expect(item.type).toBe('Error');
+                }
+            )
+        }
+    );
+});
+
+describe("Lexer correctly identifies subcripts", () => {
+    it("Lexes '_{20}' as 'SUB(_{20})'",
+        () => {
+            // Act
+            lexer.reset('_{20}');
+            const token = lexer.next();
+
+            // Assert
+            expect(token.type).toBe('Sub');
+            expect(token.value).toBe('_{20}');
+        }
+    );
+    it("Fails to lex '_{0}', '_20', '_{}'",
+        () => {
+            // Act
+            const tests = ['_{0}', '_20', '_{}'];
+            const tokens = [];
+            tests.forEach(
+                function(item, index, _arr) {
+                    lexer.reset(item);
+                    tokens[index] = lexer.next();
+                }
+            )
+            // Assert
+            tokens.forEach(
+                function(item, _index, _arr) {
                     expect(item.type).toBe('Error');
                 }
             )
