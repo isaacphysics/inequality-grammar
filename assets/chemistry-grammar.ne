@@ -20,6 +20,9 @@ const lexer = moo.compile({
         Negative: ["^{-}", "-"]
     })},
 
+    // Subscripts
+    Sub: /_{[1-9][0-9]*}/,
+
     // Non-zero naturals
     Num: /[1-9][0-9]*/,
 
