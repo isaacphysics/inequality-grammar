@@ -198,9 +198,15 @@ describe("Parser correctly parses ions", () => {
     it("Returns a 'ion' when provided with a charge",
         () => {
             // Act
-            const tests = ['Na\^{+}', 'Cl-', 'Cl\^{-}'];
-            const charges = ['pos', 'neg', 'neg'];
-            const molecules = [parse('Na'), parse('Cl'), parse('Cl')]
+            const tests = ['Na\^{+}', 'Cl-', 'Cl\^{-}', 'Fe\^{2+}', 'N\l^{3-}'];
+            const charges = [1, -1, -1, 2, -2];
+            const molecules = [
+                parse('Na').result,
+                parse('Cl').result,
+                parse('Cl').result,
+                parse('Fe').result,
+                parse('N').result
+            ]
             const ions = [];
             tests.forEach(
                 function(item, index, _arr){
@@ -228,9 +234,9 @@ describe("Parser correctly parses ions", () => {
             expect(ion.charge).toBe('pos');
             // Stored as a cons-list
             // TODO: check if this property is required and if lists are better
-            expect(ion.molecule).toEqual(parse('Na'));
+            expect(ion.molecule).toEqual(parse('Na').result);
             expect(ion.chain).toBeDefined();
-            expect(ion.molecule).toEqual(parse('Cl-F\^{-}P\^{+}'));
+            expect(ion.molecule).toEqual(parse('Cl-F\^{-}P\^{+}').result);
         }
     );
     it("Returns an 'error' object when provided with an incorrect charge",
@@ -282,11 +288,13 @@ describe("Parser correctly parses terms", () => {
         () => {
             // Act
             const AST = parse('MgSO4 . 7H2O');
+            const value = parse('MgSO4').result;
             const term = AST.result;
 
             // Assert
             expect(term.type).toBe('term');
             expect(term.isHydrate).toBeTruthy();
+            expect(term.value).toEqual(value)
             expect(term.hydrate).toBe(7);
         }
     );
