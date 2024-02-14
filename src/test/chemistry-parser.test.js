@@ -12,8 +12,7 @@ const parse = (expression = '') => {
     try {
         output = _uniqWith(parser.feed(expression).results, _isEqual)
     } catch (error) {
-        console.log(error);
-        return { type: 'error', value: error };
+        return { result: { type: 'error', value: error } };
     }
     return output
 }
@@ -24,7 +23,7 @@ describe("Parser captures lexing errors", () => {
             // Act
             const AST = parse("C!C");
             // The first node should be a 'C!' error
-            const error = AST.result.statements[0]
+            const error = AST.result;
 
             // Assert
             expect(error.type).toBe('error');
@@ -155,8 +154,8 @@ describe("Parser correctly parses compounds", () => {
         () => {
             // Act
             const tests = ['CO2', 'CH3[CH2]4CH3', '(HO)2[CO]3'];
-            const heads = [parse('C'), parse('C'), parse('(HO)2')];
-            const tails = [parse('O2'), parse('H3[CH2]4CH3'), parse('[CO]3')]
+            const heads = [parse('C').result, parse('C').result, parse('(HO).result2')];
+            const tails = [parse('O2').result, parse('H3[CH2]4CH3').result, parse('[CO]3').result]
             const compounds = [];
             tests.forEach(
                 function(item, index, _arr) {
@@ -296,7 +295,7 @@ describe("Parser correctly parses terms", () => {
             // Act
             const tests = ['2e\^{-}', '100Na\^{+}', '99NaCl . 6H2O'];
             const coeffs = [2, 100, 99];
-            const ASTs = [{}, parse('Na\^{+}'), parse('NaCl . 6H2O')];
+            const ASTs = [{}, parse('Na\^{+}').result, parse('NaCl . 6H2O').result];
             const terms = [];
             tests.forEach(
                 function(item, index, _arr) {
@@ -320,7 +319,7 @@ describe("Parser correctly parses terms", () => {
         () => {
             // Act
             const tests = ['Mg (g)', '7NaCl (aq)', 'MgSO4 . 7H2O (s)'];
-            const ASTs = [parse('Mg'), parse('NaCl'), parse('MgSO4')];
+            const ASTs = [parse('Mg').result, parse('NaCl').result, parse('MgSO4').result];
             const states = ['(g)', '(aq)', '(s)'];
             tests.forEach(
                 function(item, index, _arr) {
