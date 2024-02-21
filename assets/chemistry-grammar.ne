@@ -15,7 +15,7 @@ const lexer = moo.compile({
     })},
 
     // Charges
-    Charge: { match: /(?:-|\^{(?:[1-9][0-9]*)?(?:\+|\-)})/, type: moo.keywords({
+    Charge: { match: /(?:-|\^{(?:[1-9][0-9]*)?(?:\+|-)})/, type: moo.keywords({
         Positive: "^{+}",
         Negative: ["^{-}", "-"]
     })},
@@ -37,7 +37,7 @@ const lexer = moo.compile({
     /A[cglmrstu]|B[aehikr]?|C[adeflmnorsu]?|D[bsy]|E[rsu]|F[elmr]?|G[ade]|H[efgos]?|I[nr]?|Kr?|L[airuv]|M[cdgnot]|N[abdehiop]?|O[gs]?|P[abdmortu]?|R[abefghnu]|S[bcegimnr]?|T[abcehilms]|U|V|W|Xe|Yb?|Z[nr]/,
 
     // Hydrate part
-    Water: /.[\s]*(?:[1-9][0-9]*)?[\s]*H2O/,
+    Water: /\.[\s]*(?:[1-9][0-9]*)?[\s]*H2O/,
 
     // Plus symbol
     // (it's hard to subtract chemicals)
