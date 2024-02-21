@@ -55,14 +55,14 @@ describe("Lexer correctly identifies 'End' symbol", () => {
 });
 
 describe("Lexe correctly identifies 'Arrow' symbol", () => {
-    it("Lexes '->' as 'SArr'",
+    it("Lexes '->' as 'Arrow'",
         () => {
             // Act
             lexer.reset("->");
             const token = lexer.next();
 
             // Assert
-            expect(token.type).toBe('SArr');
+            expect(token.type).toBe('Arrow');
         }
     );
     it("Fails to lex '<->', '<=>', '>', '=>', and '<='",
@@ -291,39 +291,6 @@ describe("Lexer correctly identifies brackets", () => {
     );
 });
 
-describe("Lexer correctly identifies electrons", () => {
-    it("Lexes 'e^{-}', 'electron^{-}' as 'Electron'",
-        () => {
-            // Act
-            const tests = ['e^{-}', '\\electron^{-}'];
-            const tokens = [];
-            tests.forEach(
-                function(item, index, _arr) {
-                    lexer.reset(item);
-                    tokens[index] = lexer.next();
-                }
-            )
-
-            // Assert
-            tokens.forEach(
-                function(item, _index, _arr) {
-                    expect(item.type).toBe('Electron');
-                }
-            )
-        }
-    );
-    it("Fails to lex 'e'",
-        () => {
-            // Act
-            lexer.reset('e');
-            const token = lexer.next();
-
-            // Assert
-            expect(token.type).toBe('Error');
-        }
-    );
-});
-
 describe("Lexer correctly identifies LaTeX No-Op", () => {
     it("Lexes '{}' as 'Nop'",
         () => {
@@ -341,9 +308,9 @@ describe("Lexer correctly identifies mass and atomic numbers", () => {
     it("Lexes '\^{NUM}', '_{NUM}' as 'Mass' and 'Atomic' respectively",
         () => {
             // Act
-            lexer.reset('\^{4}_{348}');
+            lexer.reset('\^{4}_{-348}');
             const types = ['Mass', 'Atomic'];
-            const values = ['\^{4}', '_{348}'];
+            const values = ['\^{4}', '_{-348}'];
             const tokens = Array.from(lexer);
 
             // Assert
@@ -358,7 +325,7 @@ describe("Lexer correctly identifies mass and atomic numbers", () => {
     it("Fails to lex '\^NUM', '_NUM', '\^{NUM', '_{NUM'",
         () => {
             // Act
-            const tests = ['\^NUM', '_NUM', '\^{NUM', '_{NUM'];
+            const tests = ['\^2', '_2', '\^{2', '_{2'];
             const tokens = [];
             tests.forEach(
                 function(item, index, _arr) {
@@ -375,15 +342,24 @@ describe("Lexer correctly identifies mass and atomic numbers", () => {
             )
         }
     );
+    it("Fails to lex '\^{-NUM}'",
+        () => {
+            // Act
+            lexer.reset('\^{-2}');
+            const error = lexer.next();
+            // Assert
+            expect(error.type).toBe('Error');
+        }
+    );
 });
 
 describe("Lexer correctly identifies nuclear particles", () => {
     it("Lexes standard set of particles",
         () => {
             // Act
-            lexer.reset("\\alphaparticle\\betaparticle\\gammaray\\neutrino\\antineutrino\\electron\\positron\\neutron\\proton");
+            lexer.reset("e\\alphaparticle\\betaparticle\\gammaray\\neutrino\\antineutrino\\electron\\positron\\neutron\\proton");
             const tokens = Array.from(lexer);
-            const types = ["Alpha", "Beta", "Gamma", "Neutrino", "AntiNeutrino", "Electron", "Positron", "Neutron", "Proton"]
+            const types = ["Electron", "Alpha", "Beta", "Gamma", "Neutrino", "AntiNeutrino", "Electron", "Positron", "Neutron", "Proton"]
 
             // Assert
             tokens.forEach(
@@ -424,7 +400,7 @@ describe("Lexer correctly handles complex expressions", () => {
                 'Atomic',
                 'Element',
                 'WS',
-                'SArr',
+                'Arrow',
                 'WS',
                 'Mass',
                 'Atomic',
