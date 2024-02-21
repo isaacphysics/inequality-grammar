@@ -9,11 +9,11 @@ const lexer = moo.compile({
     End: [';'],
 
     // Arrows
-    SArr: "->",
+    Arrow: "->",
 
     // Mass and Atomic numbers
     Mass: /\^{(?:[1-9][0-9]*|0)}/,
-    Atomic: /_{(?:[1-9][0-9]*|0)}/,
+    Atomic: /_{(?:-?[1-9][0-9]*|0)}/,
 
     // Charges
     Charge: { match: /(?:-|\^{(?:[1-9][0-9]*)?(?:\+|\-)})/, type: moo.keywords({
@@ -49,7 +49,7 @@ const lexer = moo.compile({
     Gamma: "\\gammaray",
     Neutrino: "\\neutrino",
     AntiNeutrino: "\\antineutrino",
-    Electron: /(?:e\^{-}|\\electron\^{-}|\\electron)/,
+    Electron: /(?:e|\\electron)/,
     Positron: "\\positron",
     Neutron: "\\neutron",
     Proton: "\\proton",
