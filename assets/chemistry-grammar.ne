@@ -327,13 +327,13 @@ Molecule        -> Element                                      {% id %}
                  | Compound                                     {% id %}
 
 Compound        -> Bracket                                      {% id %}
-                 | Bracket RemComp                             {% processCompound %}
-                 | Element RemComp                             {% processCompound %}
+                 | Bracket RemComp                              {% processCompound %}
+                 | Element RemComp                              {% processCompound %}
 
 RemComp         -> Element                                      {% id %}
                  | Bracket                                      {% id %}
-                 | Element RemComp                             {% processCompound %}
-                 | Bracket RemComp                             {% processCompound %}
+                 | Element RemComp                              {% processCompound %}
+                 | Bracket RemComp                              {% processCompound %}
 
 Bracket         -> %LParen Compound %RParen OptNum              {% processBracket %}
                  | %LSquare Compound %RSquare OptNum            {% processBracket %}
