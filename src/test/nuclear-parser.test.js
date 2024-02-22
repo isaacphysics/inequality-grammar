@@ -1,34 +1,4 @@
-import _uniqWith from 'lodash/uniqWith'
-import _isEqual from 'lodash/isEqual'
-
-import { Parser, Grammar } from 'nearley'
-import grammar from '../../assets/nuclear-grammar.ne'
-
-const compiledGrammar = Grammar.fromCompiled(grammar)
-
-const parse = (expression = '') => {
-    const parser = new Parser(compiledGrammar)
-    let output = null
-    try {
-        output = _uniqWith(parser.feed(expression).results, _isEqual)
-    } catch (error) {
-        if (error.name === 'Error') {
-            const token = error.token
-        //        const expected = error.message.match(/(?<=A ).*(?= based on:)/g).map(s => s.replace(/\s+token/i, ''));
-            return [{
-                result: {
-                    type: 'error',
-                    value: token.value,
-        //                expected: expected,
-                    loc: (token.line, token.col)
-                }
-            }];
-        } else {
-            console.log(error);
-        }
-    }
-    return output
-}
+import parse from '../parseNuclear'
 
 describe("Parser captures lexing errors", () => {
     it("Returns 'error' object when parsing an error",
