@@ -1,28 +1,4 @@
-import _uniqWith from 'lodash/uniqWith'
-import _isEqual from 'lodash/isEqual'
-
-import { Parser, Grammar } from 'nearley'
-import grammar from '../../assets/chemistry-grammar.ne'
-
-const compiledGrammar = Grammar.fromCompiled(grammar)
-
-const parse = (expression = '') => {
-    const parser = new Parser(compiledGrammar)
-    let output = null
-    try {
-        output = _uniqWith(parser.feed(expression).results, _isEqual)
-    } catch (error) {
-        const token = error.token
-        return [{
-            result: {
-                type: 'error',
-                value: token.value,
-                loc: (token.line, token.col)
-            }
-        }];
-    }
-    return output
-}
+import parse from '../parseChem'
 
 describe("Parser captures lexing errors", () => {
     it("Returns 'error' object when parsing an error",
