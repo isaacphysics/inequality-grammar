@@ -326,6 +326,38 @@ describe("Parser correctly parses terms", () => {
             )
         }
     );
+    it("Returns a 'term' when given fractional coefficients",
+        () => {
+            // Act
+            const tests = ['\\frac{100}{3}Na\^{+}', '1/202e\^{-}'];
+            const coeffs = [
+                { "numerator": 100, "denominator": 3 },
+                { "numerator": 1, "denominator": 202 }
+            ]
+            const ASTs = [
+                parse('Na\^{+}')[0].result.value, // Wrapped in a 'term'
+                {}, // Electron does not have a value
+            ];
+            const terms = [];
+            tests.forEach(
+                function(item, index, _arr) {
+                    const AST = parse(item)[0];
+                    terms[index] = AST.result;
+                }
+            );
+
+            // Assert
+            terms.forEach(
+                function(item, index, _arr) {
+                    expect(item.type).toBe('term');
+                    expect(item.coeff).toEqual(coeffs[index]);
+                    if (!item.isElectron) {
+                        expect(item.value).toEqual(ASTs[index]);
+                    }
+                }
+            );
+        }
+    );
     it("Returns a 'term' when given a state (when applicable)",
         () => {
             // Act

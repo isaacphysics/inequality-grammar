@@ -28,6 +28,7 @@ const lexer = moo.compile({
 
     // Fractions
     Frac: /\\frac{[1-9][0-9]*}{[1-9[0-9]*}/,
+    Slash: ['/'],
 
     // State symbols
     State: /\((?:s|l|g|m|aq)\)/,
@@ -266,12 +267,23 @@ Return this as a fraction object.
 */
 const processFraction = (d) => {
     const regex = /\\frac{(?<num>[1-9][0-9]*)}{(?<den>[1-9[0-9]*)}/;
-    const match = d[0].text.match(regex)[0];
-    console.log(match);
+    const match = d[0].text.match(regex);
 
     return {
-        numerator: match.groups.num,
-        denominator: match.groups.den
+        numerator: parseInt(match.groups.num),
+        denominator: parseInt(match.groups.den)
+    };
+}
+
+/*
+Process a fraction.
+It is possible to write a fraction as `<num>/<num>`.
+Much easier to extract numbers from.
+*/
+const processSlash = (d) => {
+    return {
+        numerator: parseInt(d[0].text),
+        denominator: parseInt(d[2].text)
     };
 }
 
@@ -347,9 +359,10 @@ Charge          -> %Positive                                    {% function(d) {
                  | %Negative                                    {% function(d) { return -1; } %}
                  | %Charge                                      {% processCharge %}
 
-OptCoeff        -> null                                         {% function(d) { return 1; } %}
+OptCoeff        -> null                                         {% function(d) { return { numerator: 1, denominator: 1 }; } %}
                  | %Num _                                       {% processNumber %}
                  | %Frac _                                      {% processFraction %}
+                 | %Num %Slash %Num _                           {% processSlash %}
 
 OptNum          -> null                                         {% function(d) { return 1; } %}
                  | %Num                                         {% function(d) { return parseInt(d[0].text); } %}

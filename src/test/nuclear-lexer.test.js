@@ -163,39 +163,6 @@ describe("Lexer correctly identifies coefficients", () => {
     );
 });
 
-describe("Lexer correctly identifies fractions", () => {
-    it("Lexes '\\frac{1}{2}' as 'Frac(\\frac{1}{2})'",
-        () => {
-            // Act
-            lexer.reset("\\frac{1}{2}");
-            const fraction = lexer.next();
-
-            // Assert
-            expect(fraction.type).toBe("Frac");
-            expect(fraction.value).toBe("\\frac{1}{2}");
-        }
-    );
-    it("Fails to lex '\\frac12', '\\frac{1}2', '\\frac1{2}', '\\frac{1{2}', 'frac{1}{2}'",
-        () => {
-            // Act
-            const tests = ['\\frac12', '\\frac{1}2', '\\frac1{2}', '\\frac{1{2}', 'frac{1}{2}'];
-            tests.forEach(
-                function(item, index, arr) {
-                    lexer.reset(item);
-                    arr[index] = lexer.next();
-                }
-            )
-
-            // Assert
-            tests.forEach(
-                function(token, _index, _arr) {
-                    expect(token.type).toBe('Error');
-                }
-            )
-        }
-    );
-});
-
 describe("Lexer correctly identifies chemical elements", () => {
     it("Lexes all 118 elements",
         () => {

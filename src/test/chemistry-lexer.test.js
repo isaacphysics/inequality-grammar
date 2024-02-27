@@ -218,6 +218,20 @@ describe("Lexer correctly identifies fractions", () => {
             expect(fraction.value).toBe("\\frac{1}{2}");
         }
     );
+    it("Lexes '1/202' as [Num, Slash, Num]",
+        () => {
+            // Act
+            lexer.reset('1/202');
+            const numerator = lexer.next();
+            const slash = lexer.next();
+            const denominator = lexer.next();
+
+            // Assert
+            expect(numerator.type).toBe('Num');
+            expect(slash.type).toBe('Slash');
+            expect(denominator.type).toBe('Num');
+        }
+    );
     it("Fails to lex '\\frac12', '\\frac{1}2', '\\frac1{2}', '\\frac{1{2}', 'frac{1}{2}'",
         () => {
             // Act
