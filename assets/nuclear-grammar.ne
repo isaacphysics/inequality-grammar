@@ -24,9 +24,6 @@ const lexer = moo.compile({
     // Non-zero naturals
     Num: /[1-9][0-9]*/,
 
-    // Fractions
-    Frac: /\\frac{[1-9][0-9]*}{[1-9[0-9]*}/,
-
     // Chemical Elements
     Element:
     /A[cglmrstu]|B[aehikr]?|C[adeflmnorsu]?|D[bsy]|E[rsu]|F[elmr]?|G[ade]|H[efgos]?|I[nr]?|Kr?|L[airuv]|M[cdgnot]|N[abdehiop]?|O[gs]?|P[abdmortu]?|R[abefghnu]|S[bcegimnr]?|T[abcehilms]|U|V|W|Xe|Yb?|Z[nr]/,
