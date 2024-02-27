@@ -140,9 +140,9 @@ Placeholder values are included to prevent unnecessary checks at runtime.
 const processElectronTerm = (d) => {
     return {
         type: 'term',
-        value: d[1],
+        value: { type: 'electron' },
         coeff: d[0],
-        state: {},
+        state: '',
         hydrate: 0,
         isElectron: true,
         isHydrate: false
@@ -367,7 +367,7 @@ OptCoeff        -> null                                         {% function(d) {
 OptNum          -> null                                         {% function(d) { return 1; } %}
                  | %Num                                         {% function(d) { return parseInt(d[0].text); } %}
 
-OptState        -> null                                         {% function(d) { return null; } %}
+OptState        -> null                                         {% function(d) { return ''; } %}
                  | _ %State                                     {% function(d) { return d[1].value; } %}
 
 _               -> %WS:*                                        {% function(d) { return null; } %}

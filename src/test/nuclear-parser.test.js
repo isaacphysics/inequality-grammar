@@ -57,6 +57,31 @@ describe("Parser correctly parses isotopes", () => {
             )
         }
     );
+    it("Returns an 'isotope' when given prescripts",
+        () => {
+            // Act
+            const tests = ["{}\^{2}_{1}H\^{-}", "{}_{6}\^{13}C", "\^{235}_{92}U", "_{36}\^{92}Kr"];
+            const masses = [2, 13, 235, 92];
+            const atomics = [1, 6,92, 36];
+            const elements = ['H','C','U','Kr'];
+            const isotopes = [];
+            tests.forEach(
+                function(item, index, _arr) {
+                    const AST = parse(item)[0];
+                    isotopes[index] = AST.result.value;
+                }
+            );
+            // Assert
+            isotopes.forEach(
+                function(item, index, _arr) {
+                    expect(item.type).toBe('isotope');
+                    expect(item.element).toBe(elements[index]);
+                    expect(item.mass).toBe(masses[index]);
+                    expect(item.atomic).toBe(atomics[index]);
+                }
+            );
+        }
+    );
     it("Returns an 'error' object when invalid isotope provide",
         () => {
             // Act
@@ -261,8 +286,6 @@ describe("Parser correctly parses terms", () => {
         () => {
             // Act
             const tests = ["{}\^{2}_{1}H\^{-}", "{}_{6}\^{13}C", "\^{235}_{92}U", "_{36}\^{92}Kr"];
-            const masses = [2, 13, 235, 92];
-            const atomics = [1, 6,92, 36];
             const elements = ['H','C','U','Kr'];
             const terms = [];
             tests.forEach(
@@ -278,8 +301,6 @@ describe("Parser correctly parses terms", () => {
                     // Trying to do a sub-parse would result having to compare the same parse to itself
                     expect(item.value.type).toBe('isotope');
                     expect(item.value.element).toBe(elements[index]);
-                    expect(item.mass).toBe(masses[index]);
-                    expect(item.atomic).toBe(atomics[index]);
                     expect(item.isParticle).toBeFalsy();
                 }
             );

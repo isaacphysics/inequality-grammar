@@ -113,14 +113,10 @@ Process an isotope term.
 A term is some isotope or particle. In this case only the isotope.
 */
 const processIsotopeTerm = (d) => {
-    const [mass, atomic] = getMassAndAtomicNumber(d[0]);
-
     return {
         type: 'term',
-        value: d[1],
-        coeff: d[0],
-        mass: mass,
-        atomic: atomic,
+        value: d[0],
+        coeff: 1,
         isParticle: false
     };
 }
@@ -134,8 +130,6 @@ const processParticleTerm = (d) => {
         type: 'term',
         value: d[1],
         coeff: d[0],
-        mass: null,
-        atomic: null,
         isParticle: true
     };
 }
@@ -145,10 +139,14 @@ Process an isotope.
 An isotope is an element with a possible charge.
 */
 const processIsotope = (d) => {
+    const [mass, atomic] = getMassAndAtomicNumber(d[0]);
+
     return {
         type: 'isotope',
-        element: d[0].text,
-        charge: d[1]
+        element: d[1].text,
+        charge: d[2],
+        mass: mass,
+        atomic: atomic,
     };
 }
 
@@ -262,15 +260,15 @@ const processCharge = (d) => {
 main            -> _ Statement _                                {% processMain %}
 
 Statement       -> Expression                                   {% id %}
-                 | Expression _ %Arrow _ Expression              {% processStatement %}
+                 | Expression _ %Arrow _ Expression             {% processStatement %}
 
 Expression      -> Term                                         {% id %}
                  | Term _ %Plus _ Expression                    {% processExpression %}
 
-Term            -> Prescript Isotope                            {% processIsotopeTerm %}
+Term            -> Isotope                                      {% processIsotopeTerm %}
                  | OptNum Particle                              {% processParticleTerm %}
 
-Isotope         -> %Element OptCharge                           {% processIsotope %}
+Isotope         -> Prescript %Element OptCharge                 {% processIsotope %}
 
 Particle        -> Prescript %Alpha                             {% processParticle %}
                  | Prescript %Beta                              {% processParticle %}
@@ -298,7 +296,7 @@ Prescript       -> %Mass %Atomic                                    {% function(
                  | %Nop %Mass %Atomic                               {% function(d) { return d[1].text + d[2].text } %}
                  | %Nop %Atomic %Mass                               {% function(d) { return d[2].text + d[1].text } %}
 
-OptCharge       -> null                                         {% function(d) { return null; } %}
+OptCharge       -> null                                         {% function(d) { return 0; } %}
                  | %Positive                                    {% function(d) { return 1; } %}
 
                  # Without a space '+' is interpretted as positive charge
