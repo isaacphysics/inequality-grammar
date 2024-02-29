@@ -6,7 +6,7 @@ import grammar from '../assets/chemistry-grammar.ne'
 
 const compiledGrammar = Grammar.fromCompiled(grammar)
 
-const parseChemistryExpression = (expression = '') => {
+export default function(expression = '') {
     const parser = new Parser(compiledGrammar)
     let output = null
     try {
@@ -39,5 +39,3 @@ const parseChemistryExpression = (expression = '') => {
     }
     return output
 }
-
-export default parseChemistryExpression;

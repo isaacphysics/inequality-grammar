@@ -6,8 +6,11 @@ module.exports = (_env, argv) => { return {
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'inequality-grammar.js',
-        library: 'inequality-grammar',
-        libraryTarget: 'umd'
+        globalObject: 'this',
+        library: {
+            name: 'inequality-grammar',
+            type: 'umd'
+        }
     },
     module: {
         rules: [

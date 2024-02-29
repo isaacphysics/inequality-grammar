@@ -6,7 +6,7 @@ import grammar from '../assets/nuclear-grammar.ne'
 
 const compiledGrammar = Grammar.fromCompiled(grammar)
 
-const parseNuclearExpression = (expression = '') => {
+export default function(expression = '') {
     const parser = new Parser(compiledGrammar)
     let output = null
     try {
@@ -39,5 +39,3 @@ const parseNuclearExpression = (expression = '') => {
     }
     return output
 }
-
-export default parseNuclearExpression;
