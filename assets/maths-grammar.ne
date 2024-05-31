@@ -6,15 +6,13 @@ const lexer = moo.compile({
     Int: /[0-9]+/,
     IdMod: /[a-zA-ZΑ-ΡΣ-Ωα-ω]+_(?:prime)/,
     Id: { match: /[a-zA-ZΑ-ΡΣ-Ωα-ω]+(?:_[a-zA-Z0-9]+)?/, type: moo.keywords({
-            TrigFn: ['cos', 'sin', 'tan',
-                     'cosec', 'sec', 'cot',
+            TrigFn: ['cos', 'sin', 'tan', 'cosec', 'sec', 'cot',
                      'cosh', 'sinh', 'tanh', 'cosech', 'sech', 'coth',
-                     'arccos', 'arcsin', 'arctan',
-                     'arccosec', 'arcsec', 'arccot',
-                     'arccosh', 'arcsinh', 'arctanh', 'arccosech', 'arcsech', 'arccoth',
-                     'acos', 'asin', 'atan',
-                     'acosec', 'asec', 'acot',
+                     'acos', 'asin', 'atan', 'acosec', 'asec', 'acot',
                      'acosh', 'asinh', 'atanh', 'acosech', 'asech', 'acoth',
+                     'arccos', 'arcsin', 'arctan', 'arccosec', 'arcsec', 'arccot',
+                     'arccosh', 'arcsinh', 'arctanh', 'arccosech', 'arcsech', 'arccoth',
+                     'arcosh', 'arsinh', 'artanh', 'arcosech', 'arsech', 'arcoth',
                     ],
             Fn: ['ln', 'abs', 'factorial'],
             Log: ['log'],
@@ -129,12 +127,13 @@ const processFunction = (d) => {
    `innerSuperscript` property is set to true.
  */
 const processSpecialTrigFunction = (d_name, d_arg, d_exp = null) => {
-    // First, deal with the shortened a- form of arc- functions.
-    let r = new RegExp('^(?:a|arc)([^r].+)$')
+    // First, deal with inverse trig functions. This regex could match nonsensical trig names
+    // (e.g. "arcos"), but the lexer above prevents these being TrigFunctions so this doesn't matter.
+    let r = new RegExp('^(arc|ar|a)((?:sin|cos|tan|sec|cosec|cot)h?)$')
     let name = d_name.text
     let arc = false
     if (r.test(name)) {
-        name = r.exec(name)[1]
+        name = r.exec(name)[2]
         arc = 1
     }
     // Then do everything else as normal.
