@@ -144,7 +144,6 @@ const processIsotope = (d) => {
     return {
         type: 'isotope',
         element: d[1].text,
-        charge: d[2],
         mass: mass,
         atomic: atomic,
     };
@@ -237,22 +236,6 @@ const processElectron = (d) => {
     };
 }
 
-/*
-Process a charge.
-Extract the charge coefficient and sign.
-*/
-const processCharge = (d) => {
-    const regex = /\^{(?<value>[1-9][0-9]*)(?<sign>\+|-)}/;
-    const matches = d[0].text.match(regex);
-
-    if (matches.groups.sign === '-') {
-        return 0 - parseInt(matches.groups.value);
-    } else {
-        return parseInt(matches.groups.value);
-    }
-}
-
-
 %}
 
 @lexer lexer
@@ -268,7 +251,7 @@ Expression      -> Term                                         {% id %}
 Term            -> Isotope                                      {% processIsotopeTerm %}
                  | OptNum Particle                              {% processParticleTerm %}
 
-Isotope         -> Prescript %Element OptCharge                 {% processIsotope %}
+Isotope         -> Prescript %Element                           {% processIsotope %}
 
 Particle        -> Prescript %Alpha                             {% processParticle %}
                  | Prescript %Beta                              {% processParticle %}
@@ -295,14 +278,6 @@ Prescript       -> %Mass %Atomic                                    {% function(
                  | %Atomic %Mass                                    {% function(d) { return d[1].text + d[0].text } %}
                  | %Nop %Mass %Atomic                               {% function(d) { return d[1].text + d[2].text } %}
                  | %Nop %Atomic %Mass                               {% function(d) { return d[2].text + d[1].text } %}
-
-OptCharge       -> null                                         {% function(d) { return 0; } %}
-                 | %Positive                                    {% function(d) { return 1; } %}
-
-                 # Without a space '+' is interpretted as positive charge
-                 | %Plus                                        {% function(d) { return 1; } %}
-                 | %Negative                                    {% function(d) { return -1; } %}
-                 | %Charge                                      {% processCharge %}
 
 OptNum          -> null                                         {% function(d) { return 1; } %}
                  | %Num                                         {% function(d) { return parseInt(d[0].text); } %}
