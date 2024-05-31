@@ -1,30 +1,11 @@
 @{%
 const greekLetterMap = { "alpha": "α", "beta": "β", "gamma": "γ", "delta": "δ", "epsilon": "ε", "varepsilon": "ε", "zeta": "ζ", "eta": "η", "theta": "θ", "iota": "ι", "kappa": "κ", "lambda": "λ", "mu": "μ", "nu": "ν", "xi": "ξ", "omicron": "ο", "pi": "π", "rho": "ρ", "sigma": "σ", "tau": "τ", "upsilon": "υ", "phi": "ϕ", "chi": "χ", "psi": "ψ", "omega": "ω", "Gamma": "Γ", "Delta": "Δ", "Theta": "Θ", "Lambda": "Λ", "Xi": "Ξ", "Pi": "Π", "Sigma": "Σ", "Upsilon": "Υ", "Phi": "Φ", "Psi": "Ψ", "Omega": "Ω" }
-// See https://github.com/no-context/moo/blob/v0.5.1/moo.js#L337-L371
-// and https://github.com/no-context/moo/issues/141
-function keywordTransformSafe(map) {
-    let reverseMap = new Map;
-    let types = Object.getOwnPropertyNames(map);
-    for (let i = 0; i < types.length; i++) {
-        let tokenType = types[i];
-        let item = map[tokenType];
-        let keywordList = Array.isArray(item) ? item : [item];
-        keywordList.forEach(function(keyword) {
-            if (typeof keyword !== 'string') {
-                throw new Error("keyword must be string (in keyword '" + tokenType + "')");
-            }
-            reverseMap.set(keyword, tokenType);
-        })
-    }
-    return function(k) {
-        return reverseMap.get(k);
-    }
-}
+
 const moo = require("moo")
 const lexer = moo.compile({
     Int: /[0-9]+/,
     IdMod: /[a-zA-ZΑ-ΡΣ-Ωα-ω]+_(?:prime)/,
-    Id: { match: /[a-zA-ZΑ-ΡΣ-Ωα-ω]+(?:_[a-zA-Z0-9]+)?/, type: keywordTransformSafe({
+    Id: { match: /[a-zA-ZΑ-ΡΣ-Ωα-ω]+(?:_[a-zA-Z0-9]+)?/, type: moo.keywords({
             TrigFn: ['cos', 'sin', 'tan',
                      'cosec', 'sec', 'cot',
                      'cosh', 'sinh', 'tanh', 'cosech', 'sech', 'coth',
@@ -185,7 +166,7 @@ const processSpecialTrigFunction = (d_name, d_arg, d_exp = null) => {
 /* Processes non-natural logarithms. These logarithms default to base 10 but
    a different base can be specified as a second argument to the function.
    E.g., `log(x, 2)` creates a base 2 logarithm.
-   
+
    There is also limited support for symbols are bases, so `log(x, alpha_0)` is
    the logarithm of x in base \alpha_0. Expressions more complex than this are
    not allowed.
@@ -405,7 +386,7 @@ const processIdentifierModified = (d) => {
 /* Processes numbers. We have all the integers: we have positive integers,
    we have negative integers, we even have zero, but none of that rational
    nonsense!
-   
+
    Because we have fractions for that. We are not savages...
  */
 const processNumber = (d) => {
