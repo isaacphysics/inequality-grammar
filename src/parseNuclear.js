@@ -14,8 +14,9 @@ export default function(expression = '') {
     } catch (error) {
         if (error.name === 'Error') {
             const token = error.token
-            const expected_tokens = error.message.match(/(?<=A ).*(?= based on:)/g)
-            const expected = expected_tokens !== null ? expected_tokens.map(s => s.replace(/\s+token/i, '')) : [];
+//            const expected_tokens = error.message.match(/(?<=A ).*(?= based on:)/g)
+//            const expected = expected_tokens !== null ? expected_tokens.map(s => s.replace(/\s+token/i, '')) : [];
+            const expected = [];
 
             return [{
                 result: {
