@@ -199,6 +199,7 @@ A bracket is a compound that can be repeated multiple times.
 const processBracket = (d) => {
     return {
         type: 'bracket',
+        bracket: d[0].type === "LParen" ? 'round' : 'square',
         compound: d[1],
         coeff: d[3]
     };
