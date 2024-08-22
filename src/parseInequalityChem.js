@@ -23,12 +23,12 @@ function convertCoefficient(coefficient) {
             children: {
                 numerator: {
                     type: 'Num',
-                    properties: { significand: coefficient.numerator },
+                    properties: { significand: coefficient.numerator.toString() },
                     children: {}
                 },
                 denominator: {
                     type: 'Num',
-                    properties: { significand: coefficient.denominator },
+                    properties: { significand: coefficient.denominator.toString() },
                     children: {}
                 }
             }
@@ -36,7 +36,7 @@ function convertCoefficient(coefficient) {
     }
 
     // Must be a whole number coefficient
-    return { type: 'Num', properties: { significand: coefficient.numerator }, children: {} };
+    return { type: 'Num', properties: { significand: coefficient.numerator.toString() }, children: {} };
 }
 
 function convertNode(node) {
@@ -115,7 +115,7 @@ function convertNode(node) {
                     }
                 }
                 const hydrate = node.hydrate > 1
-                    ? { type: 'Num', properties: { significand: node.hydrate }, children: { right: water } }
+                    ? { type: 'Num', properties: { significand: node.hydrate.toString() }, children: { right: water } }
                     : water;
                 const hydrateRel = {
                     type: 'Relation',
@@ -151,7 +151,7 @@ function convertNode(node) {
             if (Math.abs(node.charge) !== 1) {
                 charge = {
                     type: 'Num',
-                    properties: { significand: Math.abs(node.charge) },
+                    properties: { significand: Math.abs(node.charge).toString() },
                     children: { right: charge }
                 }
             }
@@ -185,7 +185,7 @@ function convertNode(node) {
                 // Only attach coefficient if it's meaningful
                 bracket.children['subscript'] = {
                     type: 'Num',
-                    properties: { significand: node.coeff },
+                    properties: { significand: node.coeff.toString() },
                     children: {}
                 }
             }
@@ -201,7 +201,7 @@ function convertNode(node) {
             if (node.coeff > 1) {
                 element.children['subscript'] = {
                     type: 'Num',
-                    properties: { significand: node.coeff},
+                    properties: { significand: node.coeff.toString() },
                     children: {}
                 }
             }
