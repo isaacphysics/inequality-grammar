@@ -173,7 +173,6 @@ function convertNode(node) {
             return { ...lhs }
         }
         case 'bracket': {
-            console.log('bracket:', node);
             const compound = convertNode(node.compound);
             const bracket = {
                 type: 'Brackets',
