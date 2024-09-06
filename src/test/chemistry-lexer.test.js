@@ -459,10 +459,10 @@ describe("Lexer correctly identifies brackets", () => {
 });
 
 describe("Lexer correctly identifies electrons", () => {
-    it("Lexes 'e', 'electron^{-}' as 'Electron'",
+    it("Lexes 'e', 'e-', 'e^{-}', 'electron^{-}' as 'Electron'",
         () => {
             // Act
-            const tests = ['e^{-}', '\\electron^{-}'];
+            const tests = ['e', 'e-', 'e^{-}', '\\electron^{-}', '\\electron-'];
             const tokens = [];
             tests.forEach(
                 function(item, index, _arr) {
@@ -477,16 +477,6 @@ describe("Lexer correctly identifies electrons", () => {
                     expect(item.type).toBe('Electron');
                 }
             )
-        }
-    );
-    it("Fails to lex 'e'",
-        () => {
-            // Act
-            lexer.reset('e');
-            const token = lexer.next();
-
-            // Assert
-            expect(token.type).toBe('Error');
         }
     );
 });

@@ -51,7 +51,7 @@ const lexer = moo.compile({
     RSquare: "]",
 
     // Electrons
-    Electron: /(?:e|\\electron)\^{-}/,
+    Electron: /(?:e|\\electron)(?:\^{-}|-)?/,
 
     // Nop
     Nop: "{}",
@@ -118,7 +118,7 @@ A term is some ion, electron, or hydrate. In this case only the hydrate.
 Processing on the hydrate to extract the value needs to be done.
 */
 const processHydrateTerm = (d) => {
-    const regex = /\.\s*(?<num>[1-9][0-9]*)\s*H2O/;
+    const regex = /\.\s*(?<num>[1-9][0-9]*)?\s*H2O/;
     const matches = d[3].text.match(regex);
 
     return {
@@ -126,7 +126,7 @@ const processHydrateTerm = (d) => {
         value: d[1],
         coeff: d[0],
         state: d[4],
-        hydrate: parseInt(matches.groups.num),
+        hydrate: matches.groups.num ? parseInt(matches.groups.num) : 1,
         isElectron: false,
         isHydrate: true
     };
@@ -199,6 +199,7 @@ A bracket is a compound that can be repeated multiple times.
 const processBracket = (d) => {
     return {
         type: 'bracket',
+        bracket: d[0].type === "LParen" ? 'round' : 'square',
         compound: d[1],
         coeff: d[3]
     };

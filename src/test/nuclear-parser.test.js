@@ -27,40 +27,10 @@ describe("Parser correctly parses isotopes", () => {
             expect(isotope.element).toBe('C');
         }
     );
-    it("Returns a 'isotope' when provided with a charge",
-        () => {
-            // Act
-            const tests = [
-                '{}^{1}_{1}Na\^{+}',
-                '{}^{1}_{1}Cl-',
-                '{}^{1}_{1}Cl\^{-}',
-                '{}^{1}_{1}Fe\^{2+}',
-                '{}^{1}_{1}N\^{3-}'
-            ];
-            const charges = [1, -1, -1, 2, -3];
-            // Wrapped in 'term's
-            const elements = ['Na','Cl','Cl','Fe','N'];
-            const isotopes = [];
-            tests.forEach(
-                function(item, index, _arr){
-                    const AST = parse(item)[0];
-                    isotopes[index] = AST.result.value; // Wrapped in a 'term'
-                }
-            )
-            // Assert
-            isotopes.forEach(
-                function(item, index, _arr) {
-                    expect(item.type).toBe('isotope');
-                    expect(item.charge).toBe(charges[index]);
-                    expect(item.element).toEqual(elements[index]);
-                }
-            )
-        }
-    );
     it("Returns an 'isotope' when given prescripts",
         () => {
             // Act
-            const tests = ["{}\^{2}_{1}H\^{-}", "{}_{6}\^{13}C", "\^{235}_{92}U", "_{36}\^{92}Kr"];
+            const tests = ["{}\^{2}_{1}H", "{}_{6}\^{13}C", "\^{235}_{92}U", "_{36}\^{92}Kr"];
             const masses = [2, 13, 235, 92];
             const atomics = [1, 6,92, 36];
             const elements = ['H','C','U','Kr'];
@@ -92,13 +62,13 @@ describe("Parser correctly parses isotopes", () => {
             expect(error.value).toBe('z');
         }
     );
-    it("Returns an 'error' object when provided with an incorrect charge",
+    it("Returns an 'error' object when provided with a charge",
         () => {
             // Act
             const tests = [
-                '{}^{1}_{1}Cl--',
-                '{}^{1}_{1}Na\^{+}\^{+}',
-                '{}^{1}_{1}Cl\^{-}\^{-}'
+                '{}^{1}_{1}Cl-',
+                '{}^{1}_{1}Na\^{+}',
+                '{}^{1}_{1}Cl\^{-}'
             ];
             const values = ['-', '\^{+}', '\^{-}'];
             const errors = [];
