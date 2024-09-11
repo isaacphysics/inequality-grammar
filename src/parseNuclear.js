@@ -23,7 +23,7 @@ export default function(expression = '') {
                     type: 'error',
                     value: token.value,
                     expected: [...new Set(expected)],
-                    loc: (token.line, token.col)
+                    loc: [token.line, token.col]
                 }
             }];
         } else {

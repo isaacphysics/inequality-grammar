@@ -222,5 +222,19 @@ function convertToInequality(ast) {
 
 export default function(expression = '') {
     const parsedExpressions = parseChem(expression);
+    if (parsedExpressions.length < 1) return [];
+
+    const firstParse = parsedExpressions.at(0).result;
+    if (firstParse.type === 'error') {
+        // If the first option is not an error a valid parse exists
+        return {
+            error: {
+                offset: firstParse.loc[1] - 1,
+                token: { value: firstParse.value }
+            },
+            message: `Unexpected token ${firstParse.value}`,
+            stack: ""
+        };
+    }
     return parsedExpressions.map(convertToInequality);
 }
