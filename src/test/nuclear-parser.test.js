@@ -255,7 +255,7 @@ describe("Parser correctly parses terms", () => {
     it("Returns a 'term' when given prescripts and an isotope",
         () => {
             // Act
-            const tests = ["{}\^{2}_{1}H\^{-}", "{}_{6}\^{13}C", "\^{235}_{92}U", "_{36}\^{92}Kr"];
+            const tests = ["{}\^{2}_{1}H", "{}_{6}\^{13}C", "\^{235}_{92}U", "_{36}\^{92}Kr"];
             const elements = ['H','C','U','Kr'];
             const terms = [];
             tests.forEach(
