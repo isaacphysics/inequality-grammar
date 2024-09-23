@@ -274,12 +274,12 @@ Particle        -> Prescript %Alpha                             {% processPartic
                  | Prescript %Electron %Negative                {% processElectron %}
 
 # Standardise the order so that `processIsotopeTerm` and `processParticle`s can regex the values out
-Prescript       -> %Mass %Atomic                                    {% function(d) { return d[0].text + d[1].text } %}
-                 | %Atomic %Mass                                    {% function(d) { return d[1].text + d[0].text } %}
-                 | %Nop %Mass %Atomic                               {% function(d) { return d[1].text + d[2].text } %}
-                 | %Nop %Atomic %Mass                               {% function(d) { return d[2].text + d[1].text } %}
+Prescript       -> %Mass %Atomic                                {% function(d) { return d[0].text + d[1].text } %}
+                 | %Atomic %Mass                                {% function(d) { return d[1].text + d[0].text } %}
+                 | %Nop %Mass %Atomic                           {% function(d) { return d[1].text + d[2].text } %}
+                 | %Nop %Atomic %Mass                           {% function(d) { return d[2].text + d[1].text } %}
 
 OptNum          -> null                                         {% function(d) { return 1; } %}
-                 | %Num                                         {% function(d) { return parseInt(d[0].text); } %}
+                 | %Num _                                       {% function(d) { return parseInt(d[0].text); } %}
 
 _               -> %WS:*                                        {% function(d) { return null; } %}
