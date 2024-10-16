@@ -348,8 +348,8 @@ RemComp         -> Element                                      {% id %}
                  | Element RemComp                              {% processCompound %}
                  | Bracket RemComp                              {% processCompound %}
 
-Bracket         -> %LParen Compound %RParen OptNum              {% processBracket %}
-                 | %LSquare Compound %RSquare OptNum            {% processBracket %}
+Bracket         -> %LParen Ion %RParen OptNum                   {% processBracket %}
+                 | %LSquare Ion %RSquare OptNum                 {% processBracket %}
 
 Element         -> %Element OptNum                              {% processElement %}
                  | %Element %Sub                                {% processElementSub %}
