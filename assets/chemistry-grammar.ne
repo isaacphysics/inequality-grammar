@@ -15,19 +15,19 @@ const lexer = moo.compile({
     })},
 
     // Charges
-    Charge: { match: /(?:-|\^{(?:[1-9][0-9]*)?(?:\+|-)})/, type: moo.keywords({
+    Charge: { match: /(?:-|\^{(?:[0-9]+)?(?:\+|-)})/, type: moo.keywords({
         Positive: "^{+}",
         Negative: ["^{-}", "-"]
     })},
 
     // Subscripts
-    Sub: /_{[1-9][0-9]*}/,
+    Sub: /_{[0-9]+}/,
 
-    // Non-zero naturals
-    Num: /[1-9][0-9]*/,
+    // Natural numbers
+    Num: /[0-9]+/,
 
     // Fractions
-    Frac: /\\frac{[1-9][0-9]*}{[1-9[0-9]*}/,
+    Frac: /\\frac{[0-9]+}{[0-9]+}/,
     Slash: ['/'],
 
     // State symbols
@@ -38,7 +38,7 @@ const lexer = moo.compile({
     /A[cglmrstu]|B[aehikr]?|C[adeflmnorsu]?|D[bsy]|E[rsu]|F[elmr]?|G[ade]|H[efgos]?|I[nr]?|Kr?|L[airuv]|M[cdgnot]|N[abdehiop]?|O[gs]?|P[abdmortu]?|R[abefghnu]|S[bcegimnr]?|T[abcehilms]|U|V|W|Xe|Yb?|Z[nr]/,
 
     // Hydrate part
-    Water: /\.[\s]*(?:[1-9][0-9]*)?[\s]*H2O/,
+    Water: /\.[\s]*(?:[0-9]+)?[\s]*H2O/,
 
     // Plus symbol
     // (it's hard to subtract chemicals)
@@ -118,7 +118,7 @@ A term is some ion, electron, or hydrate. In this case only the hydrate.
 Processing on the hydrate to extract the value needs to be done.
 */
 const processHydrateTerm = (d) => {
-    const regex = /\.\s*(?<num>[1-9][0-9]*)?\s*H2O/;
+    const regex = /\.\s*(?<num>[0-9]+)?\s*H2O/;
     const matches = d[3].text.match(regex);
 
     return {
@@ -222,7 +222,7 @@ Process an element with subscript.
 An element with a subscript coefficient (such as O_{2}).
 */
 const processElementSub = (d) => {
-    const regex = /_{(?<num>[1-9][0-9]*)}/;
+    const regex = /_{(?<num>[0-9]+)}/;
     const matches = d[1].text.match(regex);
 
     return {
@@ -237,7 +237,7 @@ Process a charge.
 Extract the charge coefficient and sign.
 */
 const processCharge = (d) => {
-    const regex = /\^{(?<value>[1-9][0-9]*)(?<sign>\+|-)}/;
+    const regex = /\^{(?<value>[0-9]+)(?<sign>\+|-)}/;
     const matches = d[0].text.match(regex);
 
     if (matches.groups.sign === '-') {
@@ -267,7 +267,7 @@ Extract the numerator and denominator from the test.
 Return this as a fraction object.
 */
 const processFraction = (d) => {
-    const regex = /\\frac{(?<num>[1-9][0-9]*)}{(?<den>[1-9[0-9]*)}/;
+    const regex = /\\frac{(?<num>[0-9]+)}{(?<den>[0-9]+)}/;
     const match = d[0].text.match(regex);
 
     return {

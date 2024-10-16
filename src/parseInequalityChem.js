@@ -14,7 +14,7 @@ function convertCoefficient(coefficient) {
         return undefined;
     }
     if (coefficient.denominator !== 1) {
-        if (coefficient < 1) {
+        if (coefficient < 0) {
             console.error("Negative denominator encounter. Fraction should be normalised!");
             return undefined;
         }
@@ -180,7 +180,7 @@ function convertNode(node) {
                 children: { argument: compound }
             }
 
-            if (node.coeff > 1) {
+            if (node.coeff !== 1) {
                 // Only attach coefficient if it's meaningful
                 bracket.children['subscript'] = {
                     type: 'Num',
@@ -197,7 +197,7 @@ function convertNode(node) {
                 children: {}
             }
 
-            if (node.coeff > 1) {
+            if (node.coeff !== 1) {
                 element.children['subscript'] = {
                     type: 'Num',
                     properties: { significand: node.coeff.toString() },
