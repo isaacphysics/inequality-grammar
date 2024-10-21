@@ -41,7 +41,7 @@ function convertNode(node) {
         }
         case 'term': {
             const value = convertNode(node.value);
-            let lhs = node.coeff > 1
+            let lhs = node.coeff !== 1
             ? { type: 'Num', properties: { significand: node.coeff.toString() }, children: { right: value } }
             : value;
 

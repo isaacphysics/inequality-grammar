@@ -12,17 +12,17 @@ const lexer = moo.compile({
     Arrow: "->",
 
     // Mass and Atomic numbers
-    Mass: /\^{(?:[1-9][0-9]*|0)}/,
-    Atomic: /_{(?:-?[1-9][0-9]*|0)}/,
+    Mass: /\^{(?:[0-9]+)}/,
+    Atomic: /_{(?:-?[0-9]+)}/,
 
     // Charges
-    Charge: { match: /(?:-|\^{(?:[1-9][0-9]*)?(?:\+|\-)})/, type: moo.keywords({
+    Charge: { match: /(?:-|\^{(?:[0-9]+)?(?:\+|\-)})/, type: moo.keywords({
         Positive: "^{+}",
         Negative: ["^{-}", "-"]
     })},
 
-    // Non-zero naturals
-    Num: /[1-9][0-9]*/,
+    // Natural numbers
+    Num: /[0-9]+/,
 
     // Chemical Elements
     Element:
@@ -63,7 +63,7 @@ Process prescripts.
 Prescripts are used a lot and are in a standard form
 */
 const getMassAndAtomicNumber = (prescript) => {
-    const regex = /\^{(?<mass>[1-9][0-9]*|0)}_{(?<atomic>-?[1-9][0-9]*|0)}/;
+    const regex = /\^{(?<mass>[0-9]+)}_{(?<atomic>-?[0-9]+)}/;
     // prescript comes from Prescript parser rule so already text
     const matches = prescript.match(regex);
 
