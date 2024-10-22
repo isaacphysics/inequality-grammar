@@ -329,7 +329,7 @@ Expression      -> Term                                         {% id %}
                  | Term _ %Plus _ Expression                    {% processExpression %}
 
 Term            -> OptCoeff Ion OptState                        {% processTerm %}
-                 | OptCoeff Compound _ %Water OptState          {% processHydrateTerm %}
+                 | OptCoeff Ion _ %Water OptState               {% processHydrateTerm %}
                  | OptCoeff %Electron                           {% processElectronTerm %}
 
 Ion             -> Molecule                                     {% id %}
