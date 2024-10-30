@@ -88,21 +88,26 @@ function convertNode(node) {
                 default: break;
             }
 
+            const children = {}
+            if (node.mass) {
+                children.mass_number = {
+                    type: 'Num',
+                    properties: { significand: node.mass.toString() },
+                    children: {}
+                }
+            }
+            if (node.atomic) {
+                children.proton_number = {
+                    type: 'Num',
+                    properties: { significand: node.atomic.toString() },
+                    children: {}
+                }
+            }
+
             const lhs = {
                 type: 'Particle',
                 properties: { type: particle },
-                children: {
-                    mass_number: {
-                        type: 'Num',
-                        properties: { significand: node.mass.toString() },
-                        children: {}
-                    },
-                    proton_number: {
-                        type: 'Num',
-                        properties: { significand: node.atomic.toString() },
-                        children: {}
-                    }
-                }
+                children: children
             }
 
             if (node.particle === 'positron') {
