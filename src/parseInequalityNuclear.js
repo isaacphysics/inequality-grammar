@@ -48,21 +48,26 @@ function convertNode(node) {
             return lhs;
         }
         case 'isotope': {
+            const children = {}
+            if (node.mass) {
+                children.mass_number = {
+                    type: 'Num',
+                    properties: { significand: node.mass.toString() },
+                    children: {}
+                }
+            }
+            if (node.atomic) {
+                children.proton_number = {
+                    type: 'Num',
+                    properties: { significand: node.atomic.toString() },
+                    children: {}
+                }
+            }
+
             return {
                 type: 'ChemicalElement',
                 properties: { element: node.element },
-                children: {
-                    mass_number: {
-                        type: 'Num',
-                        properties: { significand: node.mass.toString() },
-                        children: {}
-                    },
-                    proton_number: {
-                        type: 'Num',
-                        properties: { significand: node.atomic.toString() },
-                        children: {}
-                    }
-                }
+                children: children
             }
         }
         case 'particle': {

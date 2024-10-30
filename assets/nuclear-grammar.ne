@@ -12,8 +12,8 @@ const lexer = moo.compile({
     Arrow: "->",
 
     // Mass and Atomic numbers
-    Mass: /\^{(?:[0-9]+)}/,
-    Atomic: /_{(?:-?[0-9]+)}/,
+    Mass: /\^{(?:[0-9]+)?}/,
+    Atomic: /_{(?:-?[0-9]+)?}/,
 
     // Charges
     Charge: { match: /(?:-|\^{(?:[0-9]+)?(?:\+|\-)})/, type: moo.keywords({
@@ -63,13 +63,16 @@ Process prescripts.
 Prescripts are used a lot and are in a standard form
 */
 const getMassAndAtomicNumber = (prescript) => {
-    const regex = /\^{(?<mass>[0-9]+)}_{(?<atomic>-?[0-9]+)}/;
+    const regex = /\^{(?<mass>[0-9]+|())}_{(?<atomic>-?[0-9]+|())}/;
     // prescript comes from Prescript parser rule so already text
     const matches = prescript.match(regex);
+    
+    const mass = matches.groups.mass === "" ? null : parseInt(matches.groups.mass);
+    const atomic = matches.groups.atomic === "" ? null : parseInt(matches.groups.atomic);
 
     return [
-        parseInt(matches.groups.mass),
-        parseInt(matches.groups.atomic)
+        mass,
+        atomic
     ];
 }
 
@@ -274,7 +277,10 @@ Particle        -> Prescript %Alpha                             {% processPartic
                  | Prescript %Electron %Negative                {% processElectron %}
 
 # Standardise the order so that `processIsotopeTerm` and `processParticle`s can regex the values out
-Prescript       -> %Mass %Atomic                                {% function(d) { return d[0].text + d[1].text } %}
+Prescript       -> null                                         {% function(d) { return "^{}_{}" } %}
+                 | %Mass                                        {% function(d) { return d[0].text + "_{}"} %}
+                 | %Atomic                                      {% function(d) { return "^{}" + d[0].text } %}
+                 | %Mass %Atomic                                {% function(d) { return d[0].text + d[1].text } %}
                  | %Atomic %Mass                                {% function(d) { return d[1].text + d[0].text } %}
                  | %Nop %Mass %Atomic                           {% function(d) { return d[1].text + d[2].text } %}
                  | %Nop %Atomic %Mass                           {% function(d) { return d[2].text + d[1].text } %}
