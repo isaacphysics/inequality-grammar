@@ -115,7 +115,7 @@ describe("Parser correctly parses brackets", () => {
     it("Returns an 'error' object when brackets are empty or contain elements",
         () => {
             // Act
-            const tests = ['()', '[]', '(C)', '[C]'];
+            const tests = ['()', '[]'];
             const errors = [];
             tests.forEach(
                 function(item, _index, _arr) {
@@ -169,17 +169,17 @@ describe("Parser correctly parses compounds", () => {
             )
         }
     );
-    it("Returns an 'error' object when given a single element",
+    it("Returns an 'term' object when given a single element",
         () => {
             // Act
             // A single element will be parsed as such
             // Brackets must contain
             const AST = parse('[C]')[0];
-            const error = AST.result;
+            const result = AST.result;
 
             // Assert
-            expect(error.type).toBe('error');
-            expect(error.value).toBe(']');
+            expect(result.type).toBe('term');
+            expect(result.value.type).toBe('bracket');
         }
     );
 });

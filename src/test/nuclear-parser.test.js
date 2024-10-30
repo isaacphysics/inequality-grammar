@@ -1,16 +1,16 @@
 import parse from '../parseNuclear'
 
 describe("Parser captures lexing errors", () => {
-    it("Returns 'error' object when parsing an error",
+    it("Returns 'term' object when parsing an isotope without mass or atomic number",
         () => {
             // Act
             const AST = parse("C")[0];
-            // The first node should be a 'C!' error
-            const error = AST.result;
+            // The first node should be a 'C' term
+            const term = AST.result;
 
             // Assert
-            expect(error.type).toBe('error');
-            expect(error.value).toBe('C');
+            expect(term.type).toBe('term');
+            expect(term.value.element).toBe('C');
         }
     );
 });
@@ -174,14 +174,32 @@ describe("Parser correctly parses particles", () => {
             )
         }
     );
-    it("Returns 'error' when mass and atomic numbers are incorrect or absent",
+    it("Returns 'particle' when mass and atomic numbers are absent",
+        () => {
+            // Act
+            const tests = ['\\alphaparticle', '\\betaparticle', '\\gammaray'];
+            const particles = [];
+            tests.forEach(
+                function(item, _index, _arr) {
+                    const AST = parse(item)[0];
+                    particles.push(AST.result.value)
+                }
+            );
+
+            // Assert
+            particles.forEach(
+                function(item, _index, _arr) {
+                    expect(item.type).toBe('particle');
+                }
+            );
+        }
+    );
+    it("Returns 'error' when mass and atomic numbers are incorrect",
         () => {
             // Act
             const tests = [
-                '\\alphaparticle',
                 '^{0}^{1}\\betaparticle',
                 '_{0}_{1}\\betaparticle',
-                '{}^{4}_{-0}\\alphaparticle',
                 '^{-4}_{2}\\alphaparticle',
             ];
             const errors = []
