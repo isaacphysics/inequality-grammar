@@ -49,14 +49,14 @@ function convertNode(node) {
         }
         case 'isotope': {
             const children = {}
-            if (node.mass) {
+            if (node.mass !== null) {
                 children.mass_number = {
                     type: 'Num',
                     properties: { significand: node.mass.toString() },
                     children: {}
                 }
             }
-            if (node.atomic) {
+            if (node.atomic !== null) {
                 children.proton_number = {
                     type: 'Num',
                     properties: { significand: node.atomic.toString() },
@@ -89,14 +89,14 @@ function convertNode(node) {
             }
 
             const children = {}
-            if (node.mass) {
+            if (node.mass !== null)  {
                 children.mass_number = {
                     type: 'Num',
                     properties: { significand: node.mass.toString() },
                     children: {}
                 }
             }
-            if (node.atomic) {
+            if (node.atomic !== null)  {
                 children.proton_number = {
                     type: 'Num',
                     properties: { significand: node.atomic.toString() },
