@@ -63,7 +63,7 @@ Process prescripts.
 Prescripts are used a lot and are in a standard form
 */
 const getMassAndAtomicNumber = (prescript) => {
-    const regex = /\^{(?<mass>[0-9]+|())}_{(?<atomic>-?[0-9]+|())}/;
+    const regex = /\^{(?<mass>(?:[0-9]+)?)}_{(?<atomic>(?:-?[0-9]+)?)}/;
     // prescript comes from Prescript parser rule so already text
     const matches = prescript.match(regex);
     
