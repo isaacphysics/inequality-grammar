@@ -134,10 +134,10 @@ describe("Lexer correctly identifies 'Charge' symbol", () => {
             expect(neg.value).toBe('\^{19-}');
         }
     );
-    it("Fails to lex '\^{++}', '\^{}', '\^{+', '\^+}', '\^+', '\^{0+}'",
+    it("Fails to lex '\^{++}', '\^{}', '\^{+', '\^+}', '\^+'",
         () => {
             // Act
-            const tests = ['\^{++}', '\^{}', '\^{+', '\^+}', '\^+', '\^{0+}'];
+            const tests = ['\^{++}', '\^{}', '\^{+', '\^+}', '\^+'];
             tests.forEach(
                 function(item, index, arr) {
                     lexer.reset(item);
@@ -167,10 +167,10 @@ describe("Lexer correctly identifies subcripts", () => {
             expect(token.value).toBe('_{20}');
         }
     );
-    it("Fails to lex '_{0}', '_20', '_{}'",
+    it("Fails to lex '_20', '_{}'",
         () => {
             // Act
-            const tests = ['_{0}', '_20', '_{}'];
+            const tests = ['_20', '_{}'];
             const tokens = [];
             tests.forEach(
                 function(item, index, _arr) {

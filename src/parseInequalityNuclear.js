@@ -48,21 +48,26 @@ function convertNode(node) {
             return lhs;
         }
         case 'isotope': {
+            const children = {}
+            if (node.mass !== null) {
+                children.mass_number = {
+                    type: 'Num',
+                    properties: { significand: node.mass.toString() },
+                    children: {}
+                }
+            }
+            if (node.atomic !== null) {
+                children.proton_number = {
+                    type: 'Num',
+                    properties: { significand: node.atomic.toString() },
+                    children: {}
+                }
+            }
+
             return {
                 type: 'ChemicalElement',
                 properties: { element: node.element },
-                children: {
-                    mass_number: {
-                        type: 'Num',
-                        properties: { significand: node.mass.toString() },
-                        children: {}
-                    },
-                    proton_number: {
-                        type: 'Num',
-                        properties: { significand: node.atomic.toString() },
-                        children: {}
-                    }
-                }
+                children: children
             }
         }
         case 'particle': {
@@ -83,21 +88,26 @@ function convertNode(node) {
                 default: break;
             }
 
+            const children = {}
+            if (node.mass !== null)  {
+                children.mass_number = {
+                    type: 'Num',
+                    properties: { significand: node.mass.toString() },
+                    children: {}
+                }
+            }
+            if (node.atomic !== null)  {
+                children.proton_number = {
+                    type: 'Num',
+                    properties: { significand: node.atomic.toString() },
+                    children: {}
+                }
+            }
+
             const lhs = {
                 type: 'Particle',
                 properties: { type: particle },
-                children: {
-                    mass_number: {
-                        type: 'Num',
-                        properties: { significand: node.mass.toString() },
-                        children: {}
-                    },
-                    proton_number: {
-                        type: 'Num',
-                        properties: { significand: node.atomic.toString() },
-                        children: {}
-                    }
-                }
+                children: children
             }
 
             if (node.particle === 'positron') {

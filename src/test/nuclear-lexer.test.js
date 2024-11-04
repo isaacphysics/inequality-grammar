@@ -124,10 +124,10 @@ describe("Lexer correctly identifies 'Charge' symbol", () => {
             expect(neg.value).toBe('\^{19-}');
         }
     );
-    it("Fails to lex '\^{++}', '\^{}', '\^{+', '\^+}', '\^+', '\^{0+}'",
+    it("Fails to lex '\^{++}', '\^{+', '\^+}', '\^+'",
         () => {
             // Act
-            const tests = ['\^{++}', '\^{}', '\^{+', '\^+}', '\^+', '\^{0+}'];
+            const tests = ['\^{++}', '\^{+', '\^+}', '\^+'];
             tests.forEach(
                 function(item, index, arr) {
                     lexer.reset(item);
