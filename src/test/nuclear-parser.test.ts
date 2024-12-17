@@ -1,4 +1,5 @@
-import parse from '../parseNuclear'
+//@ts-nocheck
+import parse from '../parseNuclear.ts';
 
 describe("Parser captures lexing errors", () => {
     it("Returns 'term' object when parsing an isotope without mass or atomic number",

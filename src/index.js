@@ -1,9 +1,9 @@
-import parseMathsExpression from './parseMaths';
-import parseBooleanExpression from './parseBool';
-import parseChemistryExpression from './parseChem';
-import parseNuclearExpression from './parseNuclear';
-import parseInequalityChemistryExpression from './parseInequalityChem';
-import parseInequalityNuclearExpression from './parseInequalityNuclear';
+import parseMathsExpression from './parseMaths.js';
+import parseBooleanExpression from './parseBool.js';
+import parseChemistryExpression from './parseChem.js';
+import parseNuclearExpression from './parseNuclear.ts';
+import parseInequalityChemistryExpression from './parseInequalityChem.js';
+import parseInequalityNuclearExpression from './parseInequalityNuclear.ts';
 
 // This is now DEPRECATED and you should use parseMathsExpression instead.
 const parseExpression = parseMathsExpression;
