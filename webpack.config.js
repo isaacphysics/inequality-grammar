@@ -16,8 +16,7 @@ module.exports = (_env, argv) => { return {
         rules: [
             {
                 test: /\.ne$/,
-                use: [
-                    {
+                use: [{
                         loader: 'babel-loader',
                         options: {
                             presets: ['@babel/preset-env']
@@ -29,14 +28,29 @@ module.exports = (_env, argv) => { return {
             {
                 test: /\.js$/,
                 exclude: /(node_modules|bower_components|dist)/,
-                use: {
+                use: [{
                     loader: 'babel-loader',
                     options: {
                         presets: ['@babel/preset-env']
                     }
-                }
+                }]
+            },
+            {
+                test: /\.ts$/,
+                exclude: /(node_modules|bower_components|dist)/,
+                use: [{
+                        loader: 'babel-loader',
+                        options: {
+                            presets: ['@babel/preset-env']
+                        }
+                    }, 
+                    'ts-loader'
+                ]
             }
         ]
+    },
+    resolve: {
+        extensions: ['.js', '.ts', '.ne']
     },
     resolveLoader: {
         modules: ['node_modules', path.resolve(__dirname, 'loaders')]
