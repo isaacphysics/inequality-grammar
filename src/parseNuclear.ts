@@ -4,7 +4,7 @@ import _isEqual from 'lodash/isEqual';
 import { Parser, Grammar } from 'nearley';
 //@ts-ignore
 import grammar from '../assets/nuclear-grammar.ne';
-import { NuclearAST } from './parseInequalityNuclear';
+import { NuclearAST } from './types';
 
 const compiledGrammar = Grammar.fromCompiled(grammar)
 

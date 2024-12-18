@@ -1,4 +1,5 @@
 import parseNuclear from "./parseNuclear";
+import { InequalityWidget, isTerm, isIsotope, isParticle, isStatement, isExpression, NuclearAST } from "./types";
 import { _findRightmost, _simplify } from "./utils";
 
 let _window: Window | { innerWidth: number, innerHeight: number };
@@ -8,86 +9,13 @@ try {
     _window = { innerWidth: 800, innerHeight: 600 };
 }
 
-const chemicalSymbol = ['H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','Al','Si','P','S','Cl','Ar','K','Ca','Sc','Ti','V','Cr','Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br','Kr','Rb','Sr','Y','Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd','In','Sn','Sb','Te','I','Xe','Cs','Ba','La','Ce','Pr','Nd','Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu','Hf','Ta','W','Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po','At','Rn','Fr','Ra','Ac','Th','Pa','U','Np','Pu','Am','Cm','Bk','Cf','Es','Fm','Md','No','Lr','Rf','Db','Sg','Bh','Hs','Mt','Ds','Rg','Cn','Nh','Fl','Mc','Lv','Ts','Og'];
-type ChemicalSymbol = typeof chemicalSymbol[number];
-
-export type ParticleString = 'alphaparticle'|'betaparticle'|'gammaray'|'neutrino'|'antineutrino'|'electron'|'positron'|'neutron'|'proton';
-export type Type = 'error'|'particle'|'isotope'|'term'|'expr'|'statement';
-export type Result = Statement | Expression | Term | ParseError;
-
-export interface ASTNode {
-    type: Type;
-}
-
-export interface ParseError extends ASTNode {
-    type: 'error';
-    value: string;
-    expected: string[];
-    loc: [number, number];
-}
-export function isParseError(node: ASTNode): node is ParseError {
-    return node.type === 'error';
-}
-
-export interface Particle extends ASTNode {
-    type: 'particle';
-    particle: ParticleString;
-    mass: number;
-    atomic: number;
-}
-export function isParticle(node: ASTNode): node is Particle {
-    return node.type === 'particle';
-}
-
-export interface Isotope extends ASTNode {
-    type: 'isotope';
-    element: ChemicalSymbol;
-    mass: number;
-    atomic: number;
-}
-export function isIsotope(node: ASTNode): node is Isotope {
-    return node.type === 'isotope';
-}
-
-export interface Term extends ASTNode {
-    type: 'term';
-    value: Isotope | Particle;
-    coeff: number;
-    isParticle: boolean;
-}
-export function isTerm(node: ASTNode): node is Term {
-    return node.type === 'term';
-}
-
-export interface Expression extends ASTNode {
-    type: 'expr';
-    term: Term;
-    rest?: Expression | Term;
-}
-export function isExpression(node: ASTNode): node is Expression {
-    return node.type === 'expr';
-}
-
-export interface Statement extends ASTNode {
-    type: 'statement';
-    left: Expression | Term;
-    right: Expression | Term;
-}
-export function isStatement(node: ASTNode): node is Statement {
-    return node.type === 'statement';
-}
-
-export interface NuclearAST {
-    result: Result;
-}
-
-function convertNode<T extends ASTNode>(node: T): any {
+function convertNode<T extends InequalityWidget>(node: T): InequalityWidget {
     switch(node.type) {
         case 'statement': {
             if(isStatement(node)) {
-                let lhs: Term | Expression = convertNode(node.left);
-                const rhs: Term | Expression = convertNode(node.right);
-                const statement = {
+                let lhs = convertNode(node.left);
+                const rhs = convertNode(node.right);
+                const statement: InequalityWidget = {
                     type: 'Relation',
                     properties: { relation: 'rightarrow' },
                     children: { right: rhs }
@@ -105,7 +33,7 @@ function convertNode<T extends ASTNode>(node: T): any {
                 let lhs = convertNode(node.term);
                 if (node.rest) {
                     const rhs = convertNode(node.rest);
-                    const expression = {
+                    const expression: InequalityWidget = {
                         type: 'BinaryOperation',
                         properties: { operation: '+' },
                         children: { right: rhs }
@@ -130,7 +58,7 @@ function convertNode<T extends ASTNode>(node: T): any {
         }
         case 'isotope': {
             if(isIsotope(node)) {
-                const children: { mass_number?: any, proton_number?: any } = {}
+                const children: { mass_number?: InequalityWidget, proton_number?: InequalityWidget } = {}
                 if (node.mass !== null) {
                     children.mass_number = {
                         type: 'Num',
@@ -174,7 +102,7 @@ function convertNode<T extends ASTNode>(node: T): any {
                         break;
                 }
 
-                const children: { mass_number?: any, proton_number?: any, superscript?: any } = {}
+                const children: { mass_number?: InequalityWidget, proton_number?: InequalityWidget, superscript?: InequalityWidget } = {}
                 if (node.mass !== null)  {
                     children.mass_number = {
                         type: 'Num',
@@ -209,12 +137,12 @@ function convertNode<T extends ASTNode>(node: T): any {
         }
         default: {
             console.error("Unknown type:", node.type);
-            return {};
+            return { type: "error", properties: {} };
         }
     }
 }
 
-function convertToInequality(ast: { result: any; }) {
+function convertToInequality(ast: NuclearAST) {
     const inequalityAST = convertNode(ast.result);
     inequalityAST.position = { x: _window.innerWidth/4, y: _window.innerHeight/3 }
     inequalityAST.expression = { latex: "", python: "" }
