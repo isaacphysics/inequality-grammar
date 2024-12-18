@@ -77,3 +77,7 @@ export function isStatement(node: InequalityWidget): node is Statement {
 export interface NuclearAST {
     result: Result;
 }
+
+export type ParsingError = { error: { offset: number, token: { value: string } }, message: string, stack: string };
+
+export type WidgetSpec = any;

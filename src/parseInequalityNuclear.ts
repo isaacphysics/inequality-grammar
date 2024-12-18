@@ -1,5 +1,6 @@
-import parseNuclear from "./parseNuclear";
-import { InequalityWidget, isTerm, isIsotope, isParticle, isStatement, isExpression, NuclearAST } from "./types";
+import { parseNuclearExpression } from "./parseNuclear";
+import { WidgetSpec } from "./types";
+import { InequalityWidget, isTerm, isIsotope, isParticle, isStatement, isExpression, NuclearAST, ParsingError } from "./types";
 import { _findRightmost, _simplify } from "./utils";
 
 let _window: Window | { innerWidth: number, innerHeight: number };
@@ -149,8 +150,8 @@ function convertToInequality(ast: NuclearAST) {
     return _simplify(inequalityAST);
 }
 
-export default function(expression = '') {
-    const parsedExpressions = parseNuclear(expression);
+export function parseInequalityNuclearExpression(expression = ''): WidgetSpec[] | ParsingError {
+    const parsedExpressions = parseNuclearExpression(expression);
     if (parsedExpressions.length < 1) return [];
 
     const firstParse = parsedExpressions.at(0)?.result;

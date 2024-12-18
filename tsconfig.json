@@ -8,9 +8,8 @@
       "esModuleInterop": true,
       "skipLibCheck": true,
       "forceConsistentCasingInFileNames": true,
-      "typeRoots": ["typings", "node_modules/@types"],
-      //"noEmit": true,
-      //"allowImportingTsExtensions": true,
+      "declaration": true,
+      "composite": true,
     },
     "include": ["src"]
   }

@@ -1,7 +1,7 @@
 var path = require('path');
 
 module.exports = (_env, argv) => { return {
-    entry: './src/index.js',
+    entry: './src/index.ts',
     devtool: argv.mode === 'development' ? 'eval-source-map' : false,
     output: {
         path: path.resolve(__dirname, 'dist'),

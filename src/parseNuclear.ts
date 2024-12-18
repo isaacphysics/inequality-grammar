@@ -8,11 +8,11 @@ import { NuclearAST } from './types';
 
 const compiledGrammar = Grammar.fromCompiled(grammar)
 
-export default function(expression = '') {
+export function parseNuclearExpression(expression = ''):  NuclearAST[]{
     const parser = new Parser(compiledGrammar);
     let output: NuclearAST[];
     try {
-        output = _uniqWith(parser.feed(expression).results as NuclearAST[], _isEqual)
+        output = _uniqWith(parser.feed(expression).results, _isEqual)
     } catch (error: any) {
         if (error.name === 'Error') {
             const token = error.token
@@ -27,7 +27,7 @@ export default function(expression = '') {
                     expected: [...new Set(expected)],
                     loc: [token.line, token.col]
                 }
-            }] as NuclearAST[];
+            }]
         } else {
             console.log(error.message);
             return [{
@@ -37,7 +37,7 @@ export default function(expression = '') {
                     expected: [],
                     loc: [0, 0]
                 }
-            }] as NuclearAST[]
+            }]
         }
     }
     return output
