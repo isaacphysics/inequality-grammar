@@ -1,4 +1,7 @@
-import parse from '../parseChem'
+//@ts-nocheck
+import { parseChemistryExpression } from '../parseChem.ts';
+
+const parse = parseChemistryExpression;
 
 describe("Parser captures lexing errors", () => {
     it("Returns 'error' object when parsing an error",

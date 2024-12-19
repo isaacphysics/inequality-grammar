@@ -16,16 +16,12 @@ export function parseNuclearExpression(expression = ''):  NuclearAST[]{
     } catch (error: any) {
         if (error.name === 'Error') {
             const token = error.token
-//            const expected_tokens = error.message.match(/(?<=A ).*(?= based on:)/g)
-//            const expected = expected_tokens !== null ? expected_tokens.map(s => s.replace(/\s+token/i, '')) : [];
-            const expected: Iterable<any> | null | undefined = [];
 
             return [{
                 result: {
                     type: 'error',
                     value: token.value,
-                    expected: [...new Set(expected)],
-                    loc: [token.line, token.col]
+                    loc: [token.line, token.col],
                 }
             }]
         } else {
@@ -34,7 +30,6 @@ export function parseNuclearExpression(expression = ''):  NuclearAST[]{
                 result: {
                     type: error.name,
                     value: error.message,
-                    expected: [],
                     loc: [0, 0]
                 }
             }]

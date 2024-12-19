@@ -1,3 +1,4 @@
+//@ts-nocheck
 import grammar from '../../assets/chemistry-grammar.ne';
 
 // const compiledGrammar = Grammar.fromCompiled(grammar);

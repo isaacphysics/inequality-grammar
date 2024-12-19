@@ -1,9 +1,8 @@
 import { parseNuclearExpression } from "./parseNuclear";
-import { WidgetSpec } from "./types";
-import { InequalityWidget, isTerm, isIsotope, isParticle, isStatement, isExpression, NuclearAST, ParsingError } from "./types";
+import { InequalityWidget, isIsotope, isParticle, isStatement, isExpression, NuclearAST, ParsingError, isNuclearTerm } from "./types";
 import { _findRightmost, _simplify } from "./utils";
 
-let _window: Window | { innerWidth: number, innerHeight: number };
+let _window: { innerWidth: number, innerHeight: number };
 try {
     _window = window;
 } catch (error) {
@@ -23,7 +22,9 @@ function convertNode<T extends InequalityWidget>(node: T): InequalityWidget {
                 }
 
                 const rightMost = _findRightmost(lhs);
-                rightMost.children['right'] = statement;
+                if (rightMost.children) {
+                    rightMost.children.right = statement;
+                }
                 lhs = _simplify(lhs);
 
                 return { ...lhs };
@@ -41,14 +42,16 @@ function convertNode<T extends InequalityWidget>(node: T): InequalityWidget {
                     }
 
                     const rightMost = _findRightmost(lhs);
-                    rightMost.children['right'] = expression;
+                    if (rightMost.children) {
+                        rightMost.children.right = expression;
+                    }
                 }
 
                 return { ...lhs };
             }
         }
         case 'term': {
-            if(isTerm(node)) {
+            if(isNuclearTerm(node)) {
                 const value = convertNode(node.value);
                 let lhs = node.coeff !== 1
                 ? { type: 'Num', properties: { significand: node.coeff.toString() }, children: { right: value } }
@@ -64,14 +67,14 @@ function convertNode<T extends InequalityWidget>(node: T): InequalityWidget {
                     children.mass_number = {
                         type: 'Num',
                         properties: { significand: node.mass.toString() },
-                        children: {}
+                        //children: {}
                     }
                 }
                 if (node.atomic !== null) {
                     children.proton_number = {
                         type: 'Num',
                         properties: { significand: node.atomic.toString() },
-                        children: {}
+                        //children: {}
                     }
                 }
 
@@ -108,14 +111,21 @@ function convertNode<T extends InequalityWidget>(node: T): InequalityWidget {
                     children.mass_number = {
                         type: 'Num',
                         properties: { significand: node.mass.toString() },
-                        children: {}
+                        //children: {}
                     }
                 }
                 if (node.atomic !== null)  {
                     children.proton_number = {
                         type: 'Num',
                         properties: { significand: node.atomic.toString() },
-                        children: {}
+                        //children: {}
+                    }
+                }
+                if (node.particle === 'positron') {
+                    children.superscript = {
+                        type: 'BinaryOperation',
+                        properties: { operation: '+' },
+                        //children: {}
                     }
                 }
 
@@ -125,20 +135,12 @@ function convertNode<T extends InequalityWidget>(node: T): InequalityWidget {
                     children: children
                 }
 
-                if (node.particle === 'positron') {
-                    lhs.children['superscript'] = {
-                        type: 'BinaryOperation',
-                        properties: { operation: '+' },
-                        children: {}
-                    }
-                }
-
                 return lhs;
             }
         }
         default: {
             console.error("Unknown type:", node.type);
-            return { type: "error", properties: {} };
+            return { type: "error", properties: {}, children: {} };
         }
     }
 }
@@ -150,7 +152,7 @@ function convertToInequality(ast: NuclearAST) {
     return _simplify(inequalityAST);
 }
 
-export function parseInequalityNuclearExpression(expression = ''): WidgetSpec[] | ParsingError {
+export function parseInequalityNuclearExpression(expression = ''): InequalityWidget[] | ParsingError {
     const parsedExpressions = parseNuclearExpression(expression);
     if (parsedExpressions.length < 1) return [];
 
