@@ -1,5 +1,6 @@
-//@ts-nocheck
+//@ts-ignore
 import grammar from '../../assets/chemistry-grammar.ne';
+import { Token } from '../types';
 
 // const compiledGrammar = Grammar.fromCompiled(grammar);
 const lexer = grammar.Lexer;
@@ -79,16 +80,17 @@ describe("Lexe correctly identifies 'Arrow' symbol", () => {
     it("Fails to lex '<->', '<==>', '>', '=>', and '<='",
         () => {
             // Act
-            const tests = ['<->', '<==>', '>', '=>', '<='];
+            const tests: string[] = ['<->', '<==>', '>', '=>', '<='];
+            const tokens: Token[] = [];
             tests.forEach(
-                function(input, index, arr) {
+                function(input, index) {
                     lexer.reset(input);
-                    arr[index] = lexer.next();
+                    tokens[index] = lexer.next();
                 }
             )
 
             // Assert
-            tests.forEach(
+            tokens.forEach(
                 function(token) {
                     expect(token.type).toBe('Error');
                 }
@@ -138,17 +140,18 @@ describe("Lexer correctly identifies 'Charge' symbol", () => {
     it("Fails to lex '\^{++}', '\^{}', '\^{+', '\^+}', '\^+'",
         () => {
             // Act
-            const tests = ['\^{++}', '\^{}', '\^{+', '\^+}', '\^+'];
+            const tests: string[] = ['\^{++}', '\^{}', '\^{+', '\^+}', '\^+'];
+            const tokens: Token[] = [];
             tests.forEach(
-                function(item, index, arr) {
+                function(item, index) {
                     lexer.reset(item);
-                    arr[index] = lexer.next();
+                    tokens[index] = lexer.next();
                 }
             )
 
             // Assert
-            tests.forEach(
-                function(item, _token, _arr) {
+            tokens.forEach(
+                function(item) {
                     expect(item.type).toBe('Error');
                 }
             )
@@ -171,17 +174,18 @@ describe("Lexer correctly identifies subcripts", () => {
     it("Fails to lex '_20', '_{}'",
         () => {
             // Act
-            const tests = ['_20', '_{}'];
-            const tokens = [];
+            const tests: string[] = ['_20', '_{}'];
+            const tokens: Token[] = [];
             tests.forEach(
-                function(item, index, _arr) {
+                function(item, index) {
                     lexer.reset(item);
                     tokens[index] = lexer.next();
                 }
             )
+
             // Assert
             tokens.forEach(
-                function(item, _index, _arr) {
+                function(item) {
                     expect(item.type).toBe('Error');
                 }
             )
@@ -236,17 +240,18 @@ describe("Lexer correctly identifies fractions", () => {
     it("Fails to lex '\\frac12', '\\frac{1}2', '\\frac1{2}', '\\frac{1{2}', 'frac{1}{2}'",
         () => {
             // Act
-            const tests = ['\\frac12', '\\frac{1}2', '\\frac1{2}', '\\frac{1{2}', 'frac{1}{2}'];
+            const tests: string[] = ['\\frac12', '\\frac{1}2', '\\frac1{2}', '\\frac{1{2}', 'frac{1}{2}'];
+            const tokens: Token[] = [];
             tests.forEach(
-                function(item, index, arr) {
+                function(item, index) {
                     lexer.reset(item);
-                    arr[index] = lexer.next();
+                    tokens[index] = lexer.next();
                 }
             )
 
             // Assert
-            tests.forEach(
-                function(token, _index, _arr) {
+            tokens.forEach(
+                function(token) {
                     expect(token.type).toBe('Error');
                 }
             )
@@ -258,20 +263,20 @@ describe("Lexer correctly identifies state symbols", () => {
     it("Lexes '(s)', '(l)', '(g)', '(m)', '(aq)' as State(SYM)",
         () => {
             // Act
-            const tests = [];
-            const expected = ['(s)', '(l)', '(g)', '(m)', '(aq)'];
-            expected.forEach(
-                function(item, index, _arr) {
+            const tests: string[] = ['(s)', '(l)', '(g)', '(m)', '(aq)'];
+            const tokens: Token[] = [];
+            tests.forEach(
+                function(item, index) {
                     lexer.reset(item);
-                    tests[index] = lexer.next();
+                    tokens[index] = lexer.next();
                 }
             )
 
             // Assert
-            tests.forEach(
-                function(token, index, _arr) {
+            tokens.forEach(
+                function(token, index) {
                     expect(token.type).toBe('State');
-                    expect(token.value).toBe(expected[index]);
+                    expect(token.value).toBe(tests[index]);
                 }
             )
         }
@@ -279,20 +284,21 @@ describe("Lexer correctly identifies state symbols", () => {
     it("Fails to lex 's', '(sl)', '(s', 's)'",
         () => {
             // Act
-            const tests = ['s', '(sl)', '(s', 's)']
+            const tests: string[] = ['s', '(sl)', '(s', 's)']
+            const tokens: Token[] = [];
             tests.forEach(
-                function(item, index, arr) {
+                function(item, index) {
                     lexer.reset(item);
                     if ([1, 2].includes(index)) {
                         lexer.next() // Consume the parenthesis
                     }
-                    arr[index] = lexer.next();
+                    tokens[index] = lexer.next();
                 }
             )
 
             // Assert
-            tests.forEach(
-                function(token, _index, _arr) {
+            tokens.forEach(
+                function(token) {
                     expect(token.type).toBe('Error');
                 }
             )
@@ -304,10 +310,10 @@ describe("Lexer correctly identifies chemical elements", () => {
     it("Lexes all 118 elements",
         () => {
             // Act
-            const elements = ['H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr', 'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd', 'In', 'Sn', 'Sb', 'Te', 'I', 'Xe', 'Cs', 'Ba', 'La', 'Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Yb', 'Lu', 'Hf', 'Ta', 'W', 'Re', 'Os', 'Ir', 'Pt', 'Au', 'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr', 'Ra', 'Ac', 'Th', 'Pa', 'U', 'Np', 'Pu', 'Am', 'Cm', 'Bk', 'Cf', 'Es', 'Fm', 'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg', 'Bh', 'Hs', 'Mt', 'Ds', 'Rg', 'Cn', 'Nh', 'Fl', 'Mc', 'Lv', 'Ts', 'Og']
-            const tokens = []
+            const elements: string[] = ['H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr', 'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd', 'In', 'Sn', 'Sb', 'Te', 'I', 'Xe', 'Cs', 'Ba', 'La', 'Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Yb', 'Lu', 'Hf', 'Ta', 'W', 'Re', 'Os', 'Ir', 'Pt', 'Au', 'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr', 'Ra', 'Ac', 'Th', 'Pa', 'U', 'Np', 'Pu', 'Am', 'Cm', 'Bk', 'Cf', 'Es', 'Fm', 'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg', 'Bh', 'Hs', 'Mt', 'Ds', 'Rg', 'Cn', 'Nh', 'Fl', 'Mc', 'Lv', 'Ts', 'Og']
+            const tokens: Token[] = []
             elements.forEach(
-                function(item, index, _arr) {
+                function(item, index) {
                     lexer.reset(item);
                     tokens[index] = lexer.next();
                 }
@@ -315,7 +321,7 @@ describe("Lexer correctly identifies chemical elements", () => {
 
             // Assert
             tokens.forEach(
-                function(item, index, _arr) {
+                function(item, index) {
                     expect(item.type).toBe('Element');
                     expect(item.value).toBe(elements[index]);
                 }
@@ -325,18 +331,18 @@ describe("Lexer correctly identifies chemical elements", () => {
     it("Fails to lex slightly wrong chemical elements",
         () => {
             // Act
-            const elements = ['Lx', 'Mx', 'Ax', 'Tx', 'Zx', 'Gx', 'Rx', 'Dx', 'Ex'];
-            const partial_element = ['Hx', 'Bx', 'Cx', 'Fx', 'Ix', 'Kx', 'Nx', 'Ox', 'Px', 'Sx', 'Yx'];
-            const tokens = [];
-            const partial_tokens = [];
+            const elements: string[] = ['Lx', 'Mx', 'Ax', 'Tx', 'Zx', 'Gx', 'Rx', 'Dx', 'Ex'];
+            const partial_element: string[] = ['Hx', 'Bx', 'Cx', 'Fx', 'Ix', 'Kx', 'Nx', 'Ox', 'Px', 'Sx', 'Yx'];
+            const tokens: Token[] = [];
+            const partial_tokens: Token[] = [];
             elements.forEach(
-                function(item, index, _arr) {
+                function(item, index) {
                     lexer.reset(item);
                     tokens[index] = lexer.next();
                 }
             );
             partial_element.forEach(
-                function(item, index, _arr) {
+                function(item, index) {
                     lexer.reset(item);
                     lexer.next(); // consume the single letter chemical
                     partial_tokens[index] = lexer.next();
@@ -345,12 +351,12 @@ describe("Lexer correctly identifies chemical elements", () => {
 
             // Assert
             tokens.forEach(
-                function(item, _index, _arr) {
+                function(item) {
                     expect(item.type).toBe('Error');
                 }
             );
             partial_tokens.forEach(
-                function(item, _index, _arr) {
+                function(item) {
                     expect(item.type).toBe('Error');
                 }
             );
@@ -362,10 +368,10 @@ describe("Lexer correctly identifies hydrates", () => {
     it("Lexes '.H2O', '. H2O', '. NUM H2O', '.NUMH2O' as 'Water'",
         () => {
             // Act
-            const test = ['.H2O', '. H2O', '. 3 H2O', '.20H2O'];
-            const tokens = [];
+            const test: string[] = ['.H2O', '. H2O', '. 3 H2O', '.20H2O'];
+            const tokens: Token[] = [];
             test.forEach(
-                function(item, index, _arr) {
+                function(item, index) {
                     lexer.reset(item);
                     tokens[index] = lexer.next();
                 }
@@ -373,7 +379,7 @@ describe("Lexer correctly identifies hydrates", () => {
 
             // Assert
             tokens.forEach(
-                function(item, index, _arr) {
+                function(item, index) {
                     expect(item.type).toBe('Water');
                     expect(item.value).toBe(test[index]);
                 }
@@ -383,10 +389,10 @@ describe("Lexer correctly identifies hydrates", () => {
     it("Fails to lex 'H2O', 'NUM . H2O' as 'Water'",
         () => {
             // Act
-            const test = ['H2O', '538 . H2O'];
-            const tokens = [];
+            const test: string[] = ['H2O', '538 . H2O'];
+            const tokens: Token[] = [];
             test.forEach(
-                function(item, index, _arr) {
+                function(item, index) {
                     lexer.reset(item);
                     tokens[index] = lexer.next();
                 }
@@ -394,7 +400,7 @@ describe("Lexer correctly identifies hydrates", () => {
 
             // Assert
             tokens.forEach(
-                function(item, _index, _arr) {
+                function(item) {
                     expect(item.type).not.toBe('Water');
                 }
             );
@@ -419,11 +425,11 @@ describe("Lexer correctly identifies brackets", () => {
     it("Lexes '(', ')', '[', ']' as 'Parentheses'",
         () => {
             // Act
-            const tests = ['(', ')', '[', ']'];
-            const types = ['LParen', 'RParen', 'LSquare', 'RSquare'];
-            const tokens = [];
+            const tests: string[] = ['(', ')', '[', ']'];
+            const types: string[] = ['LParen', 'RParen', 'LSquare', 'RSquare'];
+            const tokens: Token[] = [];
             tests.forEach(
-                function(item, index, _arr) {
+                function(item, index) {
                     lexer.reset(item);
                     tokens[index] = lexer.next();
                 }
@@ -431,7 +437,7 @@ describe("Lexer correctly identifies brackets", () => {
 
             // Assert
             tokens.forEach(
-                function(item, index, _arr) {
+                function(item, index) {
                     expect(item.type).toBe(types[index]);
                 }
             );
@@ -440,10 +446,10 @@ describe("Lexer correctly identifies brackets", () => {
     it("Fails to lex '{', '}'",
         () => {
             // Act
-            const tests = ['{', '}'];
-            const tokens = [];
+            const tests: string[] = ['{', '}'];
+            const tokens: Token[] = [];
             tests.forEach(
-                function(item, index, _arr) {
+                function(item, index) {
                     lexer.reset(item);
                     tokens[index] = lexer.next();
                 }
@@ -451,7 +457,7 @@ describe("Lexer correctly identifies brackets", () => {
 
             // Assert
             tokens.forEach(
-                function(item, _index, _arr) {
+                function(item) {
                     expect(item.type).toBe('Error');
                 }
             );
@@ -463,10 +469,10 @@ describe("Lexer correctly identifies electrons", () => {
     it("Lexes 'e', 'e-', 'e^{-}', 'electron^{-}' as 'Electron'",
         () => {
             // Act
-            const tests = ['e', 'e-', 'e^{-}', '\\electron^{-}', '\\electron-'];
-            const tokens = [];
+            const tests: string[] = ['e', 'e-', 'e^{-}', '\\electron^{-}', '\\electron-'];
+            const tokens: Token[] = [];
             tests.forEach(
-                function(item, index, _arr) {
+                function(item, index) {
                     lexer.reset(item);
                     tokens[index] = lexer.next();
                 }
@@ -474,7 +480,7 @@ describe("Lexer correctly identifies electrons", () => {
 
             // Assert
             tokens.forEach(
-                function(item, _index, _arr) {
+                function(item) {
                     expect(item.type).toBe('Electron');
                 }
             )
@@ -499,7 +505,7 @@ describe("Lexer correctly handles complex expressions", () => {
     it("Lexes 'MgNaAl5((Si2O4)2O2)3(OH)6' correctly",
         () => {
             // Act
-            const expected = [
+            const expected: string[] = [
                 'Element',
                 'Element',
                 'Element',
@@ -523,11 +529,11 @@ describe("Lexer correctly handles complex expressions", () => {
                 'Num'
             ];
             lexer.reset('MgNaAl5((Si2O4)2O2)3(OH)6');
-            const tokens = Array.from(lexer);
+            const tokens: Token[] = Array.from(lexer);
 
             // Assert
             tokens.forEach(
-                function(item, index, _arr) {
+                function(item, index) {
                     expect(item.type).toBe(expected[index]);
                 }
             )

@@ -1,5 +1,4 @@
-//@ts-nocheck
-import { parseNuclearExpression } from '../parseNuclear.ts';
+import { parseNuclearExpression } from '../parseNuclear';
 
 const parse = parseNuclearExpression;
 

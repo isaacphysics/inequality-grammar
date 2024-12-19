@@ -4,11 +4,11 @@ import _isEqual from 'lodash/isEqual'
 import { Parser, Grammar } from 'nearley'
 //@ts-ignore
 import grammar from '../assets/chemistry-grammar.ne'
-import { NuclearAST, ParsingError, ParsingError2 } from './types'
+import { ErrorToken, NuclearAST } from './types'
 
 const compiledGrammar = Grammar.fromCompiled(grammar)
 
-export function parseChemistryExpression(expression: string = ''): NuclearAST[] | ParsingError2 {
+export function parseChemistryExpression(expression: string = ''): NuclearAST[] | ErrorToken {
     const parser = new Parser(compiledGrammar)
     let output = null
     try {
@@ -24,13 +24,11 @@ export function parseChemistryExpression(expression: string = ''): NuclearAST[] 
             };
         } else {
             console.log(error.message);
-            return [{
-                result: {
-                    type: error.name,
-                    value: error.message,
-                    loc: [0, 0]
-                }
-            }]
+            return {
+                type: error.name,
+                value: error.message,
+                loc: [0, 0]
+            }
         }
     }
     return output

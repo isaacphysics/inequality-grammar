@@ -150,12 +150,18 @@ export type ParsingError = {
     stack: string;
 };
 
-export type ParsingError2 = {
+export interface Token { 
+    type: string; 
+    value: string; 
+};
+
+export interface ErrorToken extends Token {
     type: string;
-    value: any;
     loc: [number, number];
 }
 
-export type ParsingError3 = {
+export type ParsingError2 = {
     error: any;
 }
+
+

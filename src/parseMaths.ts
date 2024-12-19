@@ -4,11 +4,11 @@ import _isEqual from 'lodash/isEqual'
 import { Parser, Grammar } from 'nearley'
 //@ts-ignore
 import grammar from '../assets/maths-grammar.ne'
-import { InequalityWidget, ParsingError3 } from './types'
+import { InequalityWidget, ParsingError2 } from './types'
 
 const compiledGrammar = Grammar.fromCompiled(grammar)
 
-export default function(expression: string = ''): InequalityWidget[] | ParsingError3 {
+export function parseMathsExpression(expression: string = ''): InequalityWidget[] | ParsingError2 {
     const parser = new Parser(compiledGrammar)
     let output;
     try {

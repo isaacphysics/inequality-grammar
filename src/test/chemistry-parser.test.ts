@@ -1,5 +1,4 @@
-//@ts-nocheck
-import { parseChemistryExpression } from '../parseChem.ts';
+import { parseChemistryExpression } from '../parseChem';
 
 const parse = parseChemistryExpression;
 
