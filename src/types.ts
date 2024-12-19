@@ -2,8 +2,8 @@ const chemicalSymbol = ['H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','A
 type ChemicalSymbol = typeof chemicalSymbol[number];
 
 export type ParticleString = 'alphaparticle'|'betaparticle'|'gammaray'|'neutrino'|'antineutrino'|'electron'|'positron'|'neutron'|'proton';
-type Type = 'error'|'particle'|'isotope'|'term'|'expr'|'statement'|'number'|'ion'|'compound'|'bracket'|'element';
-type Result = Statement | Expression | Term | ParseError;
+export type Type = 'error'|'particle'|'isotope'|'term'|'expr'|'statement'|'number'|'ion'|'compound'|'bracket'|'element';
+export type Result = Statement | Expression | Term | ParseError | Ion | Compound | Bracket | Element | Isotope | Particle;
 
 export type Fraction = {
     numerator: number;
@@ -33,7 +33,7 @@ export function isParseError(node: InequalityWidget): node is ParseError {
 
 // ======= Nuclear ========
 
-interface Particle extends ASTNode {
+export interface Particle extends ASTNode {
     type: 'particle';
     particle: ParticleString;
     mass: number;
@@ -43,7 +43,7 @@ export function isParticle(node: InequalityWidget): node is Particle {
     return node.type === 'particle';
 }
 
-interface Isotope extends ASTNode {
+export interface Isotope extends ASTNode {
     type: 'isotope';
     element: ChemicalSymbol;
     mass: number;
@@ -53,7 +53,7 @@ export function isIsotope(node: InequalityWidget): node is Isotope {
     return node.type === 'isotope';
 }
 
-interface NuclearTerm extends ASTNode {
+export interface NuclearTerm extends ASTNode {
     type: 'term';
     value: Isotope | Particle;
     coeff: number;
@@ -62,9 +62,9 @@ export function isNuclearTerm(node: InequalityWidget): node is NuclearTerm {
     return node.type === 'term';
 }
 
-interface ChemistryTerm extends ASTNode {
+export interface ChemistryTerm extends ASTNode {
     type: 'term';
-    value: Element;
+    value: Ion | Compound | Element | Bracket;
     coeff: Fraction;
     isElectron: boolean;
     isHydrate: boolean;
@@ -75,18 +75,18 @@ export function isChemistryTerm(node: InequalityWidget): node is ChemistryTerm {
     return node.type === 'term';
 }
 
-type Term = NuclearTerm | ChemistryTerm;
+export type Term = NuclearTerm | ChemistryTerm;
 
-interface Expression extends ASTNode {
+export interface Expression extends ASTNode {
     type: 'expr';
     term: Term;
-    rest?: Expression | Term;
+    rest: Expression | Term;
 }
 export function isExpression(node: InequalityWidget): node is Expression {
     return node.type === 'expr';
 }
 
-interface Statement extends ASTNode {
+export interface Statement extends ASTNode {
     type: 'statement';
     left: Expression | Term;
     right: Expression | Term;
@@ -98,7 +98,7 @@ export function isStatement(node: InequalityWidget): node is Statement {
 
 // ======= Chem ========
 
-interface Ion extends ASTNode {
+export interface Ion extends ASTNode {
     type: 'ion';
     molecule: Molecule;
     charge: number;
@@ -108,7 +108,7 @@ export function isIon(node: InequalityWidget): node is Ion {
     return node.type === 'ion';
 }
 
-interface Compound extends ASTNode {
+export interface Compound extends ASTNode {
     type: 'compound';
     head: Element | Bracket;
     tail: Element | Bracket | Compound;
@@ -117,7 +117,7 @@ export function isCompound(node: InequalityWidget): node is Compound {
     return node.type === 'compound';
 }
 
-interface Bracket extends ASTNode {
+export interface Bracket extends ASTNode {
     type: 'bracket';
     bracket: 'round' | 'square';
     compound: Compound;
@@ -127,7 +127,7 @@ export function isBracket(node: InequalityWidget): node is Bracket {
     return node.type === 'bracket';
 }
 
-interface Element extends ASTNode {
+export interface Element extends ASTNode {
     type: 'element';
     value: ChemicalSymbol;
     coeff: number;
@@ -158,6 +158,9 @@ export interface Token {
 export interface ErrorToken extends Token {
     type: string;
     loc: [number, number];
+}
+export function isErrorToken(node: NuclearAST[] | ErrorToken): node is ErrorToken {
+    return !(Array.isArray(node));
 }
 
 export type ParsingError2 = {

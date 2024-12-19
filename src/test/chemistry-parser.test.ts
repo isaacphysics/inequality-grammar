@@ -1,12 +1,29 @@
 import { parseChemistryExpression } from '../parseChem';
+import { Bracket, ChemistryTerm, Compound, Element, ErrorToken, Expression, Fraction, Ion, isChemistryTerm, isErrorToken, NuclearAST, Result, Statement, Term } from '../types';
 
-const parse = parseChemistryExpression;
+// The parse returns an array of ASTs (in case of ambiguity). The grammar is unambiguous so the array will always have one element
+function parse(expression: string): Result {
+    const a = parseChemistryExpression(expression);
+    if (isErrorToken(a)) {
+        return { type: 'error', value: '', loc: [0,0] };
+    }
+    return a[0].result;
+}
+
+// All nodes below Term are wrapped in a Term. This abstraction function is therefore useful for typeguarding and compactness
+function parseTerm(expression: string): ChemistryTerm {
+    const a = parse(expression);
+    if (isChemistryTerm(a)) {
+        return a;
+    }
+    return { type: 'term' } as ChemistryTerm;
+}
 
 describe("Parser captures lexing errors", () => {
     it("Returns 'error' object when parsing an error",
         () => {
             // Act
-            const AST = parse("C!C");
+            const AST = parseChemistryExpression("C!C") as ErrorToken;
             // The first node should be a 'C!' error
 
             // Assert
@@ -20,8 +37,8 @@ describe("Parser correctly parses elements", () => {
     it("Returns an 'element' object when given a standalone element",
         () => {
             // Act
-            const AST = parse('C')[0];
-            const element = AST.result.value; // Everything below a 'term' is wrapped in a 'term'
+            const AST = parseTerm('C');
+            const element = AST.value as Element; // Everything below a 'term' is wrapped in a 'term'
 
             // Assert
             expect(element.type).toBe('element');
@@ -31,21 +48,20 @@ describe("Parser correctly parses elements", () => {
     it("Returns an 'element' object with number when provided",
         () => {
             // Act
-            const tests = ['H2', 'O_{3}'];
-            const values = ['H', 'O'];
-            const numbers = [2, 3];
-            const elements = [];
+            const tests: string[] = ['H2', 'O_{3}'];
+            const values: string[] = ['H', 'O'];
+            const numbers: number[] = [2, 3];
+            const elements: Element[] = [];
             tests.forEach(
-                function(item, index, _arr) {
-                    const AST = parse(item)[0];
-                    // Everything below a 'term' is wrapped in a 'term'
-                    elements[index] = AST.result.value;
+                function(item, index) {
+                    const AST = parseTerm(item);
+                    elements[index] = AST.value as Element;
                 }
             )
 
             // Assert
             elements.forEach(
-                function(item, index, _arr) {
+                function(item, index) {
                     expect(item.type).toBe('element');
                     expect(item.value).toBe(values[index]);
                     expect(item.coeff).toBe(numbers[index]);
@@ -56,11 +72,10 @@ describe("Parser correctly parses elements", () => {
     it("Returns an 'error' object when invalid element provide",
         () => {
             // Act
-            const AST = parse('Hz')[0];
-            const error = AST.result;
+            const AST = parseChemistryExpression('Hz') as ErrorToken;
             // Assert
-            expect(error.type).toBe('error');
-            expect(error.value).toBe('z');
+            expect(AST.type).toBe('error');
+            expect(AST.value).toBe('z');
         }
     );
 });
@@ -69,18 +84,18 @@ describe("Parser correctly parses brackets", () => {
     it("Returns an 'bracket' object when given either bracketting",
         () => {
             // Act
-            const tests = ['(CO2)', '[CO2]'];
-            const brackets = [];
+            const tests: string[] = ['(CO2)', '[CO2]'];
+            const brackets: Bracket[] = [];
             tests.forEach(
-                function(item, _index, _arr) {
-                    const AST = parse(item)[0];
-                    brackets.push(AST.result.value) // Wrapped in a 'term'
+                function(item) {
+                    const AST = parseTerm(item);
+                    brackets.push(AST.value as Bracket)
                 }
             )
 
             // Assert
             brackets.forEach(
-                function(item, _index, _arr) {
+                function(item) {
                     expect(item.type).toBe('bracket');
                     // Mutually recursive so can't test value as it may fail on 'compound'
                     // Can check the type works
@@ -92,18 +107,18 @@ describe("Parser correctly parses brackets", () => {
     it("Returns a 'bracket' object when given bracketing with numbers",
         () => {
             // Act
-            const tests = ['(CH2)4', '[CH2]320'];
-            const numbers = [4, 320];
-            const brackets = [];
+            const tests: string[] = ['(CH2)4', '[CH2]320'];
+            const numbers: number[] = [4, 320];
+            const brackets: Bracket[] = [];
             tests.forEach(
-                function(item, index, _arr) {
-                    const AST = parse(item)[0];
-                    brackets[index] = AST.result.value; // Wrapped in a 'term'
+                function(item, index) {
+                    const AST = parseTerm(item);
+                    brackets[index] = AST.value as Bracket
                 }
             );
             // Assert
             brackets.forEach(
-                function(item, index, _arr) {
+                function(item, index) {
                     expect(item.type).toBe('bracket');
                     expect(item.coeff).toBe(numbers[index]);
                     // Mutually recursive so can't test value as it may fail on 'compound'
@@ -116,17 +131,17 @@ describe("Parser correctly parses brackets", () => {
     it("Returns an 'error' object when brackets are empty or contain elements",
         () => {
             // Act
-            const tests = ['()', '[]'];
-            const errors = [];
+            const tests: string[] = ['()', '[]'];
+            const errors: ErrorToken[] = [];
             tests.forEach(
-                function(item, _index, _arr) {
-                    const AST = parse(item)[0];
-                    errors.push(AST.result);
+                function(item) {
+                    const AST = parseChemistryExpression(item) as ErrorToken;
+                    errors.push(AST);
                 }
             );
             // Assert
             errors.forEach(
-                function(item, _index, _arr) {
+                function(item) {
                     expect(item.type).toBe('error');
                 }
             )
@@ -138,29 +153,28 @@ describe("Parser correctly parses compounds", () => {
     it("Returns a 'compound' when given element and bracketted compounds",
         () => {
             // Act
-            const tests = ['CO2', 'CH3[CH2]4CH3', '(HO)2[CO]3'];
-            // All wrapped in 'term's
-            const heads = [
-                parse('C')[0].result.value,
-                parse('C')[0].result.value,
-                parse('(HO)2')[0].result.value
+            const tests: string[] = ['CO2', 'CH3[CH2]4CH3', '(HO)2[CO]3'];
+            const heads: (Element | Bracket | Compound)[] = [
+                parseTerm('C').value as Element,
+                parseTerm('C').value as Element,
+                parseTerm('(HO)2').value as Bracket,
             ];
-            const tails = [
-                parse('O2')[0].result.value,
-                parse('H3[CH2]4CH3')[0].result.value,
-                parse('[CO]3')[0].result.value
+            const tails: (Element | Bracket | Compound)[] = [
+                parseTerm('O2').value as Element,
+                parseTerm('H3[CH2]4CH3').value as Compound,
+                parseTerm('[CO]3').value as Bracket,
             ];
-            const compounds = [];
+            const compounds: Compound[] = [];
             tests.forEach(
-                function(item, index, _arr) {
-                    const AST = parse(item)[0];
-                    compounds[index] = AST.result.value; // Wrapped in a term
+                function(item, index) {
+                    const AST = parseTerm(item);
+                    compounds[index] = AST.value as Compound;
                 }
             );
 
             // Assert
             compounds.forEach(
-                function(item, index, _arr) {
+                function(item, index) {
                     expect(item.type).toBe('compound');
                     // The compound is stored as a cons-list 
                     // TODO: check whether javascript list is better
@@ -175,12 +189,13 @@ describe("Parser correctly parses compounds", () => {
             // Act
             // A single element will be parsed as such
             // Brackets must contain
-            const AST = parse('[C]')[0];
+            const AST: NuclearAST = (parseChemistryExpression('[C]') as NuclearAST[])[0];
+            const ASTTerm: Bracket = parseTerm('[C]').value as Bracket;
             const result = AST.result;
 
             // Assert
             expect(result.type).toBe('term');
-            expect(result.value.type).toBe('bracket');
+            expect(ASTTerm.type).toBe('bracket');
         }
     );
 });
@@ -192,26 +207,25 @@ describe("Parser correctly parses ions", () => {
     it("Returns a 'ion' when provided with a charge",
         () => {
             // Act
-            const tests = ['Na\^{+}', 'Cl-', 'Cl\^{-}', 'Fe\^{2+}', 'N\^{3-}'];
-            const charges = [1, -1, -1, 2, -3];
-            // Wrapped in 'term's
-            const molecules = [
-                parse('Na')[0].result.value,
-                parse('Cl')[0].result.value,
-                parse('Cl')[0].result.value,
-                parse('Fe')[0].result.value,
-                parse('N')[0].result.value
+            const tests: string[] = ['Na\^{+}', 'Cl-', 'Cl\^{-}', 'Fe\^{2+}', 'N\^{3-}'];
+            const charges: number[] = [1, -1, -1, 2, -3];
+            const molecules: Element[] = [
+                parseTerm('Na').value as Element,
+                parseTerm('Cl').value as Element,
+                parseTerm('Cl').value as Element,
+                parseTerm('Fe').value as Element,
+                parseTerm('N').value as Element
             ]
-            const ions = [];
+            const ions: Ion[] = [];
             tests.forEach(
-                function(item, index, _arr){
-                    const AST = parse(item)[0];
-                    ions[index] = AST.result.value; // Wrapped in a 'term'
+                function(item, index){
+                    const AST = parseTerm(item);
+                    ions[index] = AST.value as Ion;
                 }
             )
             // Assert
             ions.forEach(
-                function(item, index, _arr) {
+                function(item, index) {
                     expect(item.type).toBe('ion');
                     expect(item.charge).toBe(charges[index]);
                     expect(item.molecule).toEqual(molecules[index]);
@@ -222,34 +236,33 @@ describe("Parser correctly parses ions", () => {
     it("Returns an 'ion' object when provided with an ion chain",
         () => {
             // Act
-            const AST = parse('Na\^{+}Cl-F\^{-}P\^{+}')[0];
-            const ion = AST.result.value; // Everything below a 'term' is wrapped in a 'term'
+            const AST = parseTerm('Na\^{+}Cl-F\^{-}P\^{+}');
+            const ion: Ion = AST.value as Ion;
             // Assert
             expect(ion.type).toBe('ion');
             expect(ion.charge).toBe(1);
             // Stored as a cons-list
             // TODO: check if this property is required and if lists are better
-            expect(ion.molecule).toEqual(parse('Na')[0].result.value); // Wrapped in a 'term'
+            expect(ion.molecule).toEqual(parseTerm('Na').value);
             expect(ion.chain).toBeDefined();
-            expect(ion.chain).toEqual(parse('Cl-F\^{-}P\^{+}')[0].result.value); // Wrapped in a 'term'
+            expect(ion.chain).toEqual(parseTerm('Cl-F\^{-}P\^{+}').value);
         }
     );
     it("Returns an 'error' object when provided with an incorrect charge",
         () => {
             // Act
-            const tests = ['Cl--', 'Na\^{+}\^{+}', 'Cl\^{-}\^{-}'];
-            const values = ['-', '\^{+}', '\^{-}'];
-            const errors = [];
+            const tests: string[] = ['Cl--', 'Na\^{+}\^{+}', 'Cl\^{-}\^{-}'];
+            const values: string[] = ['-', '\^{+}', '\^{-}'];
+            const errors: ErrorToken[] = [];
             tests.forEach(
-                function(item, _index, _arr) {
-                    const AST = parse(item)[0];
-                    errors.push(AST.result);
+                function(item) {
+                    errors.push(parseChemistryExpression(item) as ErrorToken);
                 }
             )
 
             // Assert
             errors.forEach(
-                function(item, index, _arr) {
+                function(item, index) {
                     expect(item.type).toBe('error');
                     expect(item.value).toBe(values[index]);
                 }
@@ -262,18 +275,18 @@ describe("Parser correctly parses terms", () => {
     it("Returns a 'term' when given an electron",
         () => {
             // Act
-            const tests = ['e\^{-}', '\\electron\^{-}'];
-            const terms = [];
+            const tests: string[] = ['e\^{-}', '\\electron\^{-}'];
+            const terms: ChemistryTerm[] = [];
             tests.forEach(
-                function(item, _index, _arr) {
-                    const AST = parse(item)[0];
-                    terms.push(AST.result);
+                function(item) {
+                    const AST = parse(item) as ChemistryTerm;
+                    terms.push(AST);
                 }
             )
 
             // Assert
             terms.forEach(
-                function(item, _index, _arr) {
+                function(item) {
                     expect(item.type).toBe('term');
                     expect(item.isElectron).toBeTruthy();
                 }
@@ -283,41 +296,39 @@ describe("Parser correctly parses terms", () => {
     it("Returns a 'term' when given a hydrous crystal",
         () => {
             // Act
-            const AST = parse('MgSO4 . 7H2O')[0];
-            const value = parse('MgSO4')[0].result.value; // Wrapped in a 'term'
-            const term = AST.result;
+            const ASTTerm: ChemistryTerm = parse('MgSO4 . 7H2O') as ChemistryTerm;
+            const value: Compound = parseTerm('MgSO4').value as Compound; 
 
             // Assert
-            expect(term.type).toBe('term');
-            expect(term.isHydrate).toBeTruthy();
-            expect(term.value).toEqual(value)
-            expect(term.hydrate).toBe(7);
+            expect(ASTTerm.type).toBe('term');
+            expect(ASTTerm.isHydrate).toBeTruthy();
+            expect(ASTTerm.value).toEqual(value)
+            expect(ASTTerm.hydrate).toBe(7);
         }
     );
     it("Returns a 'term' when given a coefficient",
         () => {
             // Act
-            const tests = ['2e\^{-}', '100Na\^{+}', '99NaCl . 6H2O'];
-            const coeffs = [
+            const tests: string[] = ['2e\^{-}', '100Na\^{+}', '99NaCl . 6H2O'];
+            const coeffs: Fraction[] = [
                 { "numerator": 2, "denominator": 1 },
                 { "numerator": 100, "denominator": 1 },
                 { "numerator": 99, "denominator": 1 }
             ];
-            const ASTs = [
-                {}, // Electron does not have a value
-                parse('Na\^{+}')[0].result.value, // Wrapped in a 'term'
-                parse('NaCl . 6H2O')[0].result.value // Wrapped in a 'term'
+            const ASTs: (Element | Compound)[] = [
+                {} as Element, // Electron does not have a value
+                parseTerm('Na\^{+}').value as Element, 
+                parseTerm('NaCl . 6H2O').value as Compound
             ];
-            const terms = [];
+            const terms: ChemistryTerm[] = [];
             tests.forEach(
-                function(item, index, _arr) {
-                    const AST = parse(item)[0];
-                    terms[index] = AST.result;
+                function(item, index) {
+                    terms[index] = parse(item) as ChemistryTerm;
                 }
             )
             // Assert
             terms.forEach(
-                function(item, index, _arr) {
+                function(item, index) {
                     expect(item.type).toBe('term');
                     expect(item.coeff).toEqual(coeffs[index]);
                     if (!item.isElectron) {
@@ -330,26 +341,25 @@ describe("Parser correctly parses terms", () => {
     it("Returns a 'term' when given fractional coefficients",
         () => {
             // Act
-            const tests = ['\\frac{100}{3}Na\^{+}', '1/202e\^{-}'];
-            const coeffs = [
+            const tests: string[] = ['\\frac{100}{3}Na\^{+}', '1/202e\^{-}'];
+            const coeffs: Fraction[] = [
                 { "numerator": 100, "denominator": 3 },
                 { "numerator": 1, "denominator": 202 }
             ]
-            const ASTs = [
-                parse('Na\^{+}')[0].result.value, // Wrapped in a 'term'
-                {}, // Electron does not have a value
+            const ASTs: Element[] = [
+                parseTerm('Na\^{+}').value as Element, 
+                {} as Element, // Electron does not have a value
             ];
-            const terms = [];
+            const terms: ChemistryTerm[] = [];
             tests.forEach(
-                function(item, index, _arr) {
-                    const AST = parse(item)[0];
-                    terms[index] = AST.result;
+                function(item, index) {
+                    terms[index] = parse(item) as ChemistryTerm;
                 }
             );
 
             // Assert
             terms.forEach(
-                function(item, index, _arr) {
+                function(item, index) {
                     expect(item.type).toBe('term');
                     expect(item.coeff).toEqual(coeffs[index]);
                     if (!item.isElectron) {
@@ -362,24 +372,22 @@ describe("Parser correctly parses terms", () => {
     it("Returns a 'term' when given a state (when applicable)",
         () => {
             // Act
-            const tests = ['Mg (g)', '7NaCl (aq)', 'MgSO4 . 7H2O (s)'];
-            // Wrapped in 'term's
-            const ASTs = [
-                parse('Mg')[0].result.value,
-                parse('NaCl')[0].result.value,
-                parse('MgSO4')[0].result.value
+            const tests: string[] = ['Mg (g)', '7NaCl (aq)', 'MgSO4 . 7H2O (s)'];
+            const ASTs: (Element | Compound)[] = [
+                parseTerm('Mg').value as Element,
+                parseTerm('NaCl').value as Compound,
+                parseTerm('MgSO4').value as Compound
             ];
-            const states = ['(g)', '(aq)', '(s)'];
-            const terms = [];
+            const states: string[] = ['(g)', '(aq)', '(s)'];
+            const terms: ChemistryTerm[] = [];
             tests.forEach(
-                function(item, index, _arr) {
-                    const AST = parse(item)[0];
-                    terms[index] = AST.result;
+                function(item, index) {
+                    terms[index] = parse(item) as ChemistryTerm;
                 }
             )
             // Assert
             terms.forEach(
-                function(item, index, _arr) {
+                function(item, index) {
                     expect(item.type).toBe('term');
                     expect(item.state).toBe(states[index]);
                     expect(item.value).toEqual(ASTs[index]);
@@ -390,28 +398,26 @@ describe("Parser correctly parses terms", () => {
     it("Returns an 'error' when an electron has state",
         () => {
             // Act
-            const AST = parse('e\^{-} (s)')[0];
-            const error = AST.result;
+            const AST = parseChemistryExpression('e\^{-} (s)') as ErrorToken;
 
             // Assert
-            expect(error.type).toBe('error');
-            expect(error.value).toBe('(s)');
+            expect(AST.type).toBe('error');
+            expect(AST.value).toBe('(s)');
         }
     );
     it("Returns an 'error' when multiple states or coeffs are given",
         () => {
             // Act
-            const tests = ['10 11O2', 'O2 (g) (s)'];
-            const errors = []
+            const tests: string[] = ['10 11O2', 'O2 (g) (s)'];
+            const errors: ErrorToken[] = []
             tests.forEach(
-                function(item, _index, _arr) {
-                    const AST = parse(item)[0];
-                    errors.push(AST.result);
+                function(item) {
+                    errors.push(parseChemistryExpression(item) as ErrorToken);
                 }
             )
             // Assert
             errors.forEach(
-                function(item, _index, _arr) {
+                function(item) {
                     expect(item.type).toBe('error');
                 }
             )
@@ -423,23 +429,21 @@ describe("Parser correctly parses expressions", () => {
     it("Returns term and expression when provided with an '+'",
         () => {
             // Act
-            const AST = parse('C + C + C')[0];
-            const expr = AST.result;
+            const ASTExpr = parse('C + C + C') as Expression;
 
             // Assert
-            expect(expr.term.type).toBe('term');
-            expect(expr.rest.type).toBe('expr');
-            expect(expr.rest.term.type).toBe('term'); // a cons-list
-            expect(expr.rest.rest.type).toBe('term');
+            expect(ASTExpr.term.type).toBe('term');
+            expect(ASTExpr.rest.type).toBe('expr');
+            expect((ASTExpr.rest as Expression).term.type).toBe('term'); // a cons-list
+            expect((ASTExpr.rest as Expression).rest.type).toBe('term');
         }
     );
     it("Returns error when provided with 'term term'",
         () => {
             // Act
-            const AST = parse('C C')[0];
-            const error = AST.result;
+            const ASTError = parse('C C');
             // Assert
-            expect(error.type).toBe('error');
+            expect(ASTError.type).toBe('error');
         }
     );
 });
@@ -448,18 +452,18 @@ describe("Parser correctly parses statements", () => {
     it("Returns left and right expressions when provided with an arrow",
         () => {
             // Act
-            const statements = [];
-            const arrow = ['SArr', 'DArr'];
-            ['C->C', 'C<=>C'].forEach(
-                function(item, _index, _arr) {
-                    const AST = parse(item)[0];
-                    statements.push(AST.result)
+            const tests: string[] = ['C->C', 'C<=>C'];
+            const statements: Statement[] = [];
+            const arrow: string[] = ['SArr', 'DArr'];
+            tests.forEach(
+                function(item) {
+                    statements.push(parse(item) as Statement)
                 }
             )
 
             // Assert
             statements.forEach(
-                function(item, index, _arr) {
+                function(item, index) {
                     expect(item.left).toBeDefined();
                     expect(item.right).toBeDefined();
                     expect(item.arrow).toBeDefined();
@@ -471,11 +475,10 @@ describe("Parser correctly parses statements", () => {
     it("Returns error when provided with 'expr expr'",
         () => {
             // Act
-            const AST = parse('C C')[0];
-            const error = AST.result;
+            const ASTError = parseChemistryExpression('C C') as ErrorToken;
 
             // Assert
-            expect(error.type).toBe('error');
+            expect(ASTError.type).toBe('error');
         }
     );
 });

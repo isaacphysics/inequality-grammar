@@ -8,7 +8,7 @@ import { InequalityWidget, ParsingError2 } from './types'
 
 const compiledGrammar = Grammar.fromCompiled(grammar)
 
-export default function(expression: string = ''): InequalityWidget[] | ParsingError2 {
+export function parseBooleanExpression(expression: string = ''): InequalityWidget[] | ParsingError2 {
     const parser = new Parser(compiledGrammar)
     let output;
     try {
