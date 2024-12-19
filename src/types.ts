@@ -145,7 +145,17 @@ export interface NuclearAST {
 }
 
 export type ParsingError = { 
-    error: { offset: number, token: { value: string } }, 
-    message: string, 
-    stack: string 
+    error: { offset: number, token: { value: string } }; 
+    message: string; 
+    stack: string;
 };
+
+export type ParsingError2 = {
+    type: string;
+    value: any;
+    loc: [number, number];
+}
+
+export type ParsingError3 = {
+    error: any;
+}

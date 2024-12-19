@@ -1,5 +1,5 @@
 import { parseChemistryExpression } from "./parseChem";
-import {  isStatement , InequalityWidget, NuclearAST, isExpression, isChemistryTerm, isBracket, isCompound, isElement, isIon, Fraction } from "./types";
+import {  isStatement , InequalityWidget, NuclearAST, isExpression, isChemistryTerm, isBracket, isCompound, isElement, isIon, Fraction, ParsingError } from "./types";
 import { _findRightmost, _simplify } from "./utils";
 
 let _window: { innerWidth: number, innerHeight: number };
@@ -244,28 +244,27 @@ function convertNode<T extends InequalityWidget>(node: T): InequalityWidget {
     }
 }
 
-function convertToInequality(ast: NuclearAST) {
+function convertToInequality(ast: NuclearAST): InequalityWidget {
     const inequalityAST = convertNode(ast.result);
     inequalityAST.position = { x: _window.innerWidth/4, y: _window.innerHeight/3 }
     inequalityAST.expression = { latex: "", python: "" }
     return _simplify(inequalityAST);
 }
 
-export function parseInequalityChemistryExpression(expression = '') {
+export function parseInequalityChemistryExpression(expression: string = ''): InequalityWidget[] | ParsingError {
     const parsedExpressions = parseChemistryExpression(expression);
-    if (parsedExpressions.length < 1) return [];
-
-    const firstParse = parsedExpressions.at(0).result;
-    if (firstParse.type === 'error') {
-        // If the first option is not an error a valid parse exists
+    if (Array.isArray(parsedExpressions)) {
+        if (parsedExpressions.length < 1) return [];
+        
+        return parsedExpressions.map(convertToInequality);
+    } else {
         return {
             error: {
-                offset: firstParse.loc[1] - 1,
-                token: { value: firstParse.value }
+                offset: parsedExpressions.loc[1] - 1,
+                token: { value: parsedExpressions.value }
             },
-            message: `Unexpected token ${firstParse.value}`,
+            message: `Unexpected token ${parsedExpressions.value}`,
             stack: ""
         };
     }
-    return parsedExpressions.map(convertToInequality);
 }

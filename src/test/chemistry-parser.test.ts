@@ -7,13 +7,12 @@ describe("Parser captures lexing errors", () => {
     it("Returns 'error' object when parsing an error",
         () => {
             // Act
-            const AST = parse("C!C")[0];
+            const AST = parse("C!C");
             // The first node should be a 'C!' error
-            const error = AST.result;
 
             // Assert
-            expect(error.type).toBe('error');
-            expect(error.value).toBe('!');
+            expect(AST.type).toBe('error');
+            expect(AST.value).toBe('!');
         }
     );
 });

@@ -4,11 +4,11 @@ import _isEqual from 'lodash/isEqual';
 import { Parser, Grammar } from 'nearley';
 //@ts-ignore
 import grammar from '../assets/nuclear-grammar.ne';
-import { NuclearAST } from './types';
+import { NuclearAST, ParsingError2 } from './types';
 
 const compiledGrammar = Grammar.fromCompiled(grammar)
 
-export function parseNuclearExpression(expression = ''):  NuclearAST[]{
+export function parseNuclearExpression(expression: string = ''): NuclearAST[] | ParsingError2 {
     const parser = new Parser(compiledGrammar);
     let output: NuclearAST[];
     try {
@@ -17,22 +17,18 @@ export function parseNuclearExpression(expression = ''):  NuclearAST[]{
         if (error.name === 'Error') {
             const token = error.token
 
-            return [{
-                result: {
-                    type: 'error',
-                    value: token.value,
-                    loc: [token.line, token.col],
-                }
-            }]
+            return {
+                type: 'error',
+                value: token.value,
+                loc: [token.line, token.col],    
+            }
         } else {
             console.log(error.message);
-            return [{
-                result: {
-                    type: error.name,
-                    value: error.message,
-                    loc: [0, 0]
-                }
-            }]
+            return {
+                type: error.name,
+                value: error.message,
+                loc: [0, 0]
+            }
         }
     }
     return output

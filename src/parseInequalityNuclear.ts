@@ -145,28 +145,27 @@ function convertNode<T extends InequalityWidget>(node: T): InequalityWidget {
     }
 }
 
-function convertToInequality(ast: NuclearAST) {
+function convertToInequality(ast: NuclearAST): InequalityWidget {
     const inequalityAST = convertNode(ast.result);
     inequalityAST.position = { x: _window.innerWidth/4, y: _window.innerHeight/3 }
     inequalityAST.expression = { latex: "", python: "" }
     return _simplify(inequalityAST);
 }
 
-export function parseInequalityNuclearExpression(expression = ''): InequalityWidget[] | ParsingError {
+export function parseInequalityNuclearExpression(expression: string = ''): InequalityWidget[] | ParsingError {
     const parsedExpressions = parseNuclearExpression(expression);
-    if (parsedExpressions.length < 1) return [];
+    if (Array.isArray(parsedExpressions)) {
+        if (parsedExpressions.length < 1) return [];
 
-    const firstParse = parsedExpressions.at(0)?.result;
-    if (firstParse?.type === 'error') {
-        // If the first option is not an error a valid parse exists
+        return parsedExpressions.map(convertToInequality);
+    } else {
         return {
             error: {
-                offset: firstParse.loc[1] - 1,
-                token: { value: firstParse.value }
+                offset: parsedExpressions.loc[1] - 1,
+                token: { value: parsedExpressions.value }
             },
-            message: `Unexpected token ${firstParse.value}`,
+            message: `Unexpected token ${parsedExpressions.value}`,
             stack: ""
         };
     }
-    return parsedExpressions.map(convertToInequality);
 }
