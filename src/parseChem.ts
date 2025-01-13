@@ -4,15 +4,15 @@ import _isEqual from 'lodash/isEqual'
 import { Parser, Grammar } from 'nearley'
 //@ts-ignore
 import grammar from '../assets/chemistry-grammar.ne'
-import { ErrorToken, NuclearAST } from './types'
+import { ErrorToken, ChemistryAST } from './types'
 
 const compiledGrammar = Grammar.fromCompiled(grammar)
 
-export function parseChemistryExpression(expression: string = ''): NuclearAST[] | ErrorToken {
+export function parseChemistryExpression(expression: string = ''): ChemistryAST[] | ErrorToken {
     const parser = new Parser(compiledGrammar)
     let output = null
     try {
-        output = _uniqWith(parser.feed(expression).results as NuclearAST[], _isEqual)
+        output = _uniqWith(parser.feed(expression).results as ChemistryAST[], _isEqual)
     } catch (error: any) {
         if (error.name === 'Error') {
             const token = error.token

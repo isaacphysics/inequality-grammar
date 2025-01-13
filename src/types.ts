@@ -53,29 +53,20 @@ export function isIsotope(node: InequalityWidget): node is Isotope {
     return node.type === 'isotope';
 }
 
-export interface NuclearTerm extends ASTNode {
+interface Term extends ASTNode { 
     type: 'term';
+    value: ASTNode;
+    coeff: number | Fraction;
+}
+
+export interface NuclearTerm extends Term {
     value: Isotope | Particle;
     coeff: number;
+    isParticle: boolean;
 }
 export function isNuclearTerm(node: InequalityWidget): node is NuclearTerm {
     return node.type === 'term';
 }
-
-export interface ChemistryTerm extends ASTNode {
-    type: 'term';
-    value: Ion | Compound | Element | Bracket;
-    coeff: Fraction;
-    isElectron: boolean;
-    isHydrate: boolean;
-    hydrate: number;
-    state: string;
-}
-export function isChemistryTerm(node: InequalityWidget): node is ChemistryTerm {
-    return node.type === 'term';
-}
-
-export type Term = NuclearTerm | ChemistryTerm;
 
 export interface Expression extends ASTNode {
     type: 'expr';
@@ -97,6 +88,18 @@ export function isStatement(node: InequalityWidget): node is Statement {
 }
 
 // ======= Chem ========
+
+export interface ChemistryTerm extends Term {
+    value: Ion | Compound | Element | Bracket;
+    coeff: Fraction;
+    isElectron: boolean;
+    isHydrate: boolean;
+    hydrate: number;
+    state: string;
+}
+export function isChemistryTerm(node: InequalityWidget): node is ChemistryTerm {
+    return node.type === 'term';
+}
 
 export interface Ion extends ASTNode {
     type: 'ion';
@@ -140,6 +143,10 @@ export type Molecule = Element | Compound;
 
 // =====================
 
+export interface ChemistryAST {
+    result: Result;
+}
+
 export interface NuclearAST {
     result: Result;
 }
@@ -159,7 +166,7 @@ export interface ErrorToken extends Token {
     type: string;
     loc: [number, number];
 }
-export function isErrorToken(node: NuclearAST[] | ErrorToken): node is ErrorToken {
+export function isErrorToken(node: NuclearAST[] | ChemistryAST[] | ErrorToken): node is ErrorToken {
     return !(Array.isArray(node));
 }
 

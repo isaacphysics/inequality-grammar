@@ -1,5 +1,5 @@
 import { parseChemistryExpression } from "./parseChem";
-import {  isStatement , InequalityWidget, NuclearAST, isExpression, isChemistryTerm, isBracket, isCompound, isElement, isIon, Fraction, ParsingError } from "./types";
+import {  isStatement , InequalityWidget, ChemistryAST, isExpression, isChemistryTerm, isBracket, isCompound, isElement, isIon, Fraction, ParsingError } from "./types";
 import { _findRightmost, _simplify } from "./utils";
 
 let _window: { innerWidth: number, innerHeight: number };
@@ -244,7 +244,7 @@ function convertNode<T extends InequalityWidget>(node: T): InequalityWidget {
     }
 }
 
-function convertToInequality(ast: NuclearAST): InequalityWidget {
+function convertToInequality(ast: ChemistryAST): InequalityWidget {
     const inequalityAST = convertNode(ast.result);
     inequalityAST.position = { x: _window.innerWidth/4, y: _window.innerHeight/3 }
     inequalityAST.expression = { latex: "", python: "" }

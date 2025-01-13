@@ -1,7 +1,7 @@
 import { parseChemistryExpression } from '../parseChem';
-import { Bracket, ChemistryTerm, Compound, Element, ErrorToken, Expression, Fraction, Ion, isChemistryTerm, isErrorToken, NuclearAST, Result, Statement, Term } from '../types';
+import { Bracket, ChemistryTerm, Compound, Element, ErrorToken, Expression, Fraction, Ion, isChemistryTerm, isErrorToken, NuclearAST, Result, Statement } from '../types';
 
-// The parse returns an array of ASTs (in case of ambiguity). The grammar is unambiguous so the array will always have one element
+// The nearley parser returns an array of ASTs (in case of ambiguity). The grammar is unambiguous so the array will always have one element
 function parse(expression: string): Result {
     const a = parseChemistryExpression(expression);
     if (isErrorToken(a)) {
