@@ -12,11 +12,10 @@ try {
 function convertCoefficient(coefficient: Fraction): InequalityWidget {
     if (coefficient.numerator === 1 && coefficient.denominator === 1) {
         // This isn't really a coefficient
-        throw new Error("Coefficient is 1, so should not be represented");
+        return { type: 'Num', properties: { significand: "1" } };
     }
     if (coefficient.denominator !== 1) {
         if (coefficient.denominator < 0) {
-            console.error("Negative denominator encounter. Fraction should be normalised!");
             throw new Error("Negative denominator encounter. Fraction should be normalised!");
         }
         return {
@@ -95,12 +94,8 @@ function convertNode<T extends InequalityWidget>(node: T): InequalityWidget {
                 try {
                     lhs = convertCoefficient(node.coeff);
                 } catch (error) {
-                    // If an error is thrown, the coefficient is 1
-                    if (node.isElectron) {
-                        return electron;
-                    } else {
-                        lhs = node.value;
-                    }
+                    console.error("Error converting coefficient:", error);
+                    return { type: "error" };
                 }
 
                 if (node.isElectron) {
@@ -240,7 +235,7 @@ function convertNode<T extends InequalityWidget>(node: T): InequalityWidget {
         }
         default: {
             console.error("Unknown type:", node.type);
-            return {} as InequalityWidget;
+            return { type: "error" };
         }
     }
 }

@@ -4,7 +4,7 @@ export { parseChemistryExpression } from './parseChem';
 export { parseNuclearExpression } from './parseNuclear';
 export { parseInequalityChemistryExpression } from './parseInequalityChem';
 export { parseInequalityNuclearExpression } from './parseInequalityNuclear';
-export { ParsingError } from './types';
+export { ParsingError, InequalityWidget } from './types';
 
 // This is now DEPRECATED and you should use parseMathsExpression instead.
 const parseExpression = parseMathsExpression;
