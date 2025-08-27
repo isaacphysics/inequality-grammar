@@ -67,14 +67,12 @@ function convertNode<T extends InequalityWidget>(node: T): InequalityWidget {
                     children.mass_number = {
                         type: 'Num',
                         properties: { significand: node.mass.toString() },
-                        //children: {}
                     }
                 }
                 if (node.atomic !== null) {
                     children.proton_number = {
                         type: 'Num',
                         properties: { significand: node.atomic.toString() },
-                        //children: {}
                     }
                 }
 
@@ -111,21 +109,18 @@ function convertNode<T extends InequalityWidget>(node: T): InequalityWidget {
                     children.mass_number = {
                         type: 'Num',
                         properties: { significand: node.mass.toString() },
-                        //children: {}
                     }
                 }
                 if (node.atomic !== null)  {
                     children.proton_number = {
                         type: 'Num',
                         properties: { significand: node.atomic.toString() },
-                        //children: {}
                     }
                 }
                 if (node.particle === 'positron') {
                     children.superscript = {
                         type: 'BinaryOperation',
                         properties: { operation: '+' },
-                        //children: {}
                     }
                 }
 
@@ -140,7 +135,7 @@ function convertNode<T extends InequalityWidget>(node: T): InequalityWidget {
         }
         default: {
             console.error("Unknown type:", node.type);
-            return { type: "error", properties: {}, children: {} };
+            return { type: "error" };
         }
     }
 }

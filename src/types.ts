@@ -170,8 +170,3 @@ export function isErrorToken(node: NuclearAST[] | ChemistryAST[] | ErrorToken): 
     return !(Array.isArray(node));
 }
 
-export type ParsingError2 = {
-    error: any;
-}
-
-

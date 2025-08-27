@@ -9,15 +9,15 @@ try {
     _window = { innerWidth: 800, innerHeight: 600 }
 }
 
-function convertCoefficient(coefficient: Fraction): InequalityWidget | undefined { // make this throw an error >:(
+function convertCoefficient(coefficient: Fraction): InequalityWidget {
     if (coefficient.numerator === 1 && coefficient.denominator === 1) {
         // This isn't really a coefficient
-        return undefined;
+        throw new Error("Coefficient is 1, so should not be represented");
     }
     if (coefficient.denominator !== 1) {
         if (coefficient.denominator < 0) {
             console.error("Negative denominator encounter. Fraction should be normalised!");
-            return undefined;
+            throw new Error("Negative denominator encounter. Fraction should be normalised!");
         }
         return {
             type: 'Fraction',
@@ -83,23 +83,29 @@ function convertNode<T extends InequalityWidget>(node: T): InequalityWidget {
         }
         case 'term': {
             if (isChemistryTerm(node)) {
-                let lhs = convertCoefficient(node.coeff);
+                const electron = {
+                    type: 'Particle',
+                    properties: { type: 'electron', particle: '\\electron' },
+                    children: {}
+                }
+
+                let lhs: InequalityWidget;
                 let rightMost: InequalityWidget;
 
-                if (node.isElectron) {
-                    const electron = {
-                        type: 'Particle',
-                        properties: { type: 'electron', particle: '\\electron' },
-                        children: {}
-                    }
-
-                    if (lhs === undefined) {
-                        // If there is no coefficient return the bare electron
+                try {
+                    lhs = convertCoefficient(node.coeff);
+                } catch (error) {
+                    // If an error is thrown, the coefficient is 1
+                    if (node.isElectron) {
                         return electron;
+                    } else {
+                        lhs = node.value;
                     }
+                }
 
+                if (node.isElectron) {
                     rightMost = _findRightmost(lhs);
-                    if(rightMost.children) {
+                    if (rightMost.children) {
                         rightMost.children.right = electron;
                     }
                     return lhs;
@@ -107,16 +113,11 @@ function convertNode<T extends InequalityWidget>(node: T): InequalityWidget {
 
                 // Update lhs appropriately
                 const value = convertNode(node.value);
-                if (lhs === undefined) {
-                    // If there is no coefficient use the value instead
-                    lhs = value;
-                } else {
-                    // Otherwise attach value
-                    rightMost = _findRightmost(lhs);
-                    if (rightMost.children) {
-                        rightMost.children.right = value;
-                    }
+                rightMost = _findRightmost(lhs);
+                if (rightMost.children) {
+                    rightMost.children.right = value;
                 }
+                
                 // Update rightmost
                 rightMost = _findRightmost(value);
 
