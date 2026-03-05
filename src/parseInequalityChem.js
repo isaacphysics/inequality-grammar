@@ -79,7 +79,7 @@ function convertNode(node) {
                 const electron = {
                     type: 'Particle',
                     properties: { type: 'electron', particle: '\\electron' },
-                    children: {}
+                    children: { superscript: { type: "BinaryOperation", properties: { operation: "-" } } }
                 }
 
                 if (lhs === undefined) {
