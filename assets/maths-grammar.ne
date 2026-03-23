@@ -333,10 +333,13 @@ const _processChainOfLetters = (s) => {
    This function is mainly responsible for parsing things like `x`, `x_0`,
    `x_y`, `alpha_1`, and so on, but `dx` is a differential, so if you want `d*x`
    you have to say so explicitly. `d(x)` also generates `d*(x)` so be careful.
+
+   Since this function is recursive and nearley doesn't parse recursive functions correctly,
+   we have to call it from a non-recursive wrapper function `processIdentifier()`.
  */
-const processIdentifier = (d) => {
+const parseIdentifier = (text) => {
     const greekLetterKeys = Object.keys(greekLetterMap)
-    let parts = d[0].text.split('_')
+    let parts = text.split('_')
 
     // Perhaps we have a differential
     let patterns = ['[a-zA-Z]', ...greekLetterKeys].join('|')
@@ -347,7 +350,7 @@ const processIdentifier = (d) => {
         return {
             type: 'Differential',
             properties: { letter: greekLetterMap[diffMaybe[1]] || diffMaybe[1] },
-            children: { argument: processIdentifier([{ text: d[0].text.substring(diffMaybe[1].length) }]) }
+            children: { argument: parseIdentifier(text.substring(diffMaybe[1].length) ) }
         }
     } else {
         // We don't have a differential, business as usual
@@ -365,6 +368,10 @@ const processIdentifier = (d) => {
         }
         return topChain
     }
+}
+
+const processIdentifier = (d) => {
+    return parseIdentifier(d[0].text)
 }
 
 /* Processes "modified" Symbols. For example, `alpha_prime` generates a Symbol
