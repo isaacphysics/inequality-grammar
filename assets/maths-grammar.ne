@@ -30,6 +30,7 @@ const lexer = moo.compile({
     Rparen: ')',
     Comma: ',',
     c: /./,
+    GraphLine: '→',
 })
 
 import _cloneDeep from 'lodash/cloneDeep'
@@ -76,6 +77,17 @@ const processRelation = (d) => {
     let relation = { type: 'Relation', properties: { relation: relText }, children: { right: rhs } }
     let r = _findRightmost(lhs)
     r.children['right'] = relation
+    lhs = _simplify(lhs)
+    return { ...lhs, position: { x: _window.innerWidth/4, y: _window.innerHeight/3 }, expression: { latex: "", python: "" } }
+}
+
+const processGraphLine = (d) => {
+    let lhs = _cloneDeep(d[1])
+    let rhs = _cloneDeep(d[5])
+    let relText = '→';
+    let relation = { type: 'GraphLine', properties: {}, children: { endline: rhs } }
+    let r = _findRightmost(lhs)
+    r.children['endline'] = relation
     lhs = _simplify(lhs)
     return { ...lhs, position: { x: _window.innerWidth/4, y: _window.innerHeight/3 }, expression: { latex: "", python: "" } }
 }
@@ -482,6 +494,7 @@ const processDerivative = (d) => {
 
 main -> _ AS _                                                         {% processMain %}
       | _ AS _ %Rel _ AS _                                             {% processRelation %}
+      | _ AS _ %GraphLine _ AS _                                       {% processGraphLine %}
 
 # Functions of various kinds. Some are even disguised as operators!
 P ->                   %Lparen _ AS _                 %Rparen          {% processBrackets %}
