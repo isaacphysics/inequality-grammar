@@ -30,7 +30,7 @@ const lexer = moo.compile({
     Rparen: ')',
     Comma: ',',
     c: /./,
-    GraphLine: '→',
+    GraphLine: ['→', '↔'],
 })
 
 import _cloneDeep from 'lodash/cloneDeep'
@@ -81,11 +81,19 @@ const processRelation = (d) => {
     return { ...lhs, position: { x: _window.innerWidth/4, y: _window.innerHeight/3 }, expression: { latex: "", python: "" } }
 }
 
+/*
+    This is another alternative main point of entry for when we want to parse
+    expressions that contain two sides joined by a graph line symbol, such as
+    `f(x) → 0` or `7 ↔ 21`.
+    
+    This one also sets up the outer shell of the Inequality AST because it
+    operates at the same level as `processMain()`, so it has to perform a
+    similar job.
+*/
 const processGraphLine = (d) => {
     let lhs = _cloneDeep(d[1])
     let rhs = _cloneDeep(d[5])
-    let relText = '→';
-    let relation = { type: 'GraphLine', properties: {}, children: { endline: rhs } }
+    let relation = { type: 'GraphLine', properties: { type: d[3].text }, children: { endline: rhs } }
     let r = _findRightmost(lhs)
     r.children['endline'] = relation
     lhs = _simplify(lhs)
