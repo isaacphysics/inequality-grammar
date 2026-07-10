@@ -102,7 +102,8 @@ const processNot = (d) => {
 %}
 
 main -> _ AS _              {% processMain %}
-      | _ AS _ "=" _ AS _   {% processRelation %} 
+      | _ AS _ "=" _ AS _   {% processRelation %}
+      | _ AS _ "==" _ AS _  {% processRelation %}
 
 # OR
 AS -> AS _ "OR" _ MD        {% processBinaryOperation %}
