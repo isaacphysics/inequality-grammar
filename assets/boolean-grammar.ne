@@ -41,7 +41,7 @@ const processMain = (d) => {
 const processRelation = (d) => {
     let lhs = _cloneDeep(d[1])
     let rhs = _cloneDeep(d[5])
-    let relText = d[3]
+    let relText = d[3] === '==' ? '=' : d[3]
     let relation = { type: 'Relation', properties: { relation: relText }, children: { right: rhs } }
     let r = _findRightmost(lhs)
     r.children['right'] = relation
@@ -102,7 +102,8 @@ const processNot = (d) => {
 %}
 
 main -> _ AS _              {% processMain %}
-      | _ AS _ "=" _ AS _   {% processRelation %} 
+      | _ AS _ "=" _ AS _   {% processRelation %}
+      | _ AS _ "==" _ AS _  {% processRelation %}
 
 # OR
 AS -> AS _ "OR" _ MD        {% processBinaryOperation %}
